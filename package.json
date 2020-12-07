@@ -1,0 +1,26 @@
+{
+  "name": "hermit",
+  "version": "0.0.1",
+  "description": "A tool to generate dockerfiles for projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raidenkyu/FEUP-DISS.git"
+  },
+  "keywords": [
+    "Docker",
+    "Containers",
+    "Automation",
+    "Minimalism",
+    "Security"
+  ],
+  "author": "João Carlos Maduro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Raidenkyu/FEUP-DISS/issues"
+  },
+  "homepage": "https://github.com/Raidenkyu/FEUP-DISS#readme"
+}
