@@ -1,5 +1,8 @@
-import greet from '../index'
+import { getSystemCalls } from '../index';
 
-const text: string = "Hello World";
+const test = async () => {
+  const syscalls = await getSystemCalls("neofetch");
+  console.log(syscalls);
+}
 
-greet(text);
+test();
