@@ -4,13 +4,13 @@ import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir } from './u
 import { parseLine } from './utils/parser';
 
 
-export const getSystemCalls = (command: string) => new Promise((resolve, reject) => {
+export const getSystemCalls = (command: string) => new Promise((resolve: Function, reject: Function) => {
   const syscalls: Array<Object> = [];
 
   createTemporaryDir();
 
   const tracerProcess: ChildProcess = exec(
-    `strace -f ${command} 2>&1 | grep open > ${TEMP_DIR}/${SYSCALL_LOGS}`
+    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "sin_port|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`
   );
 
   tracerProcess.on('exit', (_code) => {

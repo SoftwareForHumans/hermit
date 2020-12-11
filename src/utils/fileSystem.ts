@@ -5,7 +5,11 @@ export const TEMP_DIR: string = 'tmp';
 export const SYSCALL_LOGS: string = 'syscall.log';
 
 export const createTemporaryDir = () => {
-  fs.mkdir(path.join('./', TEMP_DIR), (err) => {
+  const dir_path: string = path.join('./', TEMP_DIR);
+
+  if (fs.existsSync(dir_path)) return;
+
+  fs.mkdir(dir_path, (err) => {
     if (err) {
       return console.error(err);
     }
