@@ -1,8 +1,9 @@
-import { getSystemCalls } from '../index';
+import { getSystemInfo } from '../index';
+
 
 const test = async () => {
-  const syscalls = await getSystemCalls("ping google.pt -c 5");
-  console.log(syscalls);
+  const systemInfo = await getSystemInfo(process.argv[2]);
+  console.log(systemInfo);
 }
 
 test();

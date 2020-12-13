@@ -2,35 +2,74 @@ import { ChildProcess, exec } from 'child_process';
 
 import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir } from './utils/fileSystem';
 import { parseLine } from './utils/parser';
+import { Syscall } from './utils/lib/syscall';
 
+const PROC_TIMEOUT: number = 5000;
 
-export const getSystemCalls = (command: string) => new Promise((resolve: Function, reject: Function) => {
+const parseProcLogs = (): Array<Object> => {
   const syscalls: Array<Object> = [];
 
+  const logs: string = readSyscallLogs();
+
+  logs.split('\n').forEach((line: string) => {
+
+    const syscall: Syscall | null = parseLine(line);
+
+    if (syscall == null) return;
+
+    syscalls.push(syscall);
+  });
+
+  return syscalls;
+}
+
+const getSystemCalls = (command: string) => new Promise<Array<Syscall>>((resolve: Function, reject: Function) => {
   createTemporaryDir();
 
   const tracerProcess: ChildProcess = exec(
-    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "sin_port|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`
+    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "sin_port|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
+    { timeout: PROC_TIMEOUT }
   );
 
-  tracerProcess.on('exit', (_code) => {
-    const logs: string = readSyscallLogs();
+  tracerProcess.on('exit', (code) => {
+    if (code == null) {
+      console.log(`Process after ${PROC_TIMEOUT} have passed`);
+    }
+    else {
+      console.log(`Process finished with code ${code}`);
+    }
 
-    logs.split('\n').forEach((line: string) => {
-      console.log(line);
-
-      const syscall: Object | null = parseLine(line);
-
-      if (syscall == null) return;
-
-      console.log(syscall);
-      syscalls.push(syscall);
-    });
-
-    resolve(syscalls);
+    resolve(parseProcLogs());
   });
 
   tracerProcess.on('error', (error) => {
     reject(error);
   });
 })
+
+export const getSystemInfo = async (command: string) => {
+  const syscalls: Array<Syscall> = await getSystemCalls(command);
+
+  const systemInfo = {
+    dependencies: new Array<string>(),
+    ports: new Array<string>()
+  }
+
+  syscalls.forEach((call) => {
+    const syscallName: string = call.syscall;
+
+    switch (syscallName) {
+      case 'openat':
+        const fileName: string = call.args[1];
+        systemInfo.dependencies.push(fileName);
+        break;
+      case 'recvfrom':
+        console.log(call);
+        break;
+      default:
+        break;
+    }
+  });
+
+  return systemInfo;
+}

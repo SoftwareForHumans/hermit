@@ -1,3 +1,5 @@
+import { Syscall } from './lib/syscall'
+
 // Import parser from the lib in b3-strace-parser
 const parser = require('b3-strace-parser/lib/parser');
 const errors = require('b3-strace-parser/lib/errors');
@@ -6,11 +8,10 @@ parser.initialize({
   trace: process.env.TRACE == 'true'
 });
 
-export const parseLine = (line: string): Object | null => {
+export const parseLine = (line: string): Syscall | null => {
   try {
-    console.log('Received line: ' + line);
 
-    let parsed = parser.parseLine(line, { debug: true });
+    let parsed: Syscall = parser.parseLine(line, { debug: true });
     return parsed;
   } catch (e) {
     switch (true) {
