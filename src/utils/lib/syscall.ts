@@ -1,6 +1,6 @@
 export interface Syscall {
   syscall: string,
-  args: Array<string>,
+  args: Array<any>,
   result: number,
   timing: number,
   pid: number,

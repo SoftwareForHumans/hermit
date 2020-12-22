@@ -27,13 +27,13 @@ const getSystemCalls = (command: string) => new Promise<Array<Syscall>>((resolve
   createTemporaryDir();
 
   const tracerProcess: ChildProcess = exec(
-    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "sin_port|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
+    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "bind|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
     { timeout: PROC_TIMEOUT }
   );
 
   tracerProcess.on('exit', (code) => {
     if (code == null) {
-      console.log(`Process after ${PROC_TIMEOUT} have passed`);
+      console.log(`Process terminated after ${PROC_TIMEOUT} have passed`);
     }
     else {
       console.log(`Process finished with code ${code}`);
@@ -52,7 +52,7 @@ export const getSystemInfo = async (command: string) => {
 
   const systemInfo = {
     dependencies: new Array<string>(),
-    ports: new Array<string>()
+    ports: new Array<number>()
   }
 
   syscalls.forEach((call) => {
@@ -63,8 +63,9 @@ export const getSystemInfo = async (command: string) => {
         const fileName: string = call.args[1];
         systemInfo.dependencies.push(fileName);
         break;
-      case 'recvfrom':
-        console.log(call);
+      case 'bind':
+        const port: number = call.args[1]['sin6_port'].params[0]
+        systemInfo.ports.push(port);
         break;
       default:
         break;
