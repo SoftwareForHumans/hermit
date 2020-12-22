@@ -35,7 +35,7 @@ The compiled JavaScript code would be located in the `dist/` directory.
 ## How to run compiled Javascript code
 It is required first to have compiled with the previous command. This scenario offers the advantage of running the tool in any directory, while with `npm start` it is mandatory to be in the root of the project.
 
-Run in the root of the project:
+Run (in any directory):
 ```bash
 node /path/to/root/dist/bin/hermit.js <service_command>
 ```
