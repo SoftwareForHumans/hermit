@@ -4,9 +4,9 @@
   "description": "A tool to generate dockerfiles for projects",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/bin/hermit.ts",
+    "start": "ts-node src/bin/cli.ts",
     "build": "tsc",
-    "hermit": "node dist/bin/hermit.js",
+    "hermit": "node dist/bin/cli.js",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
   "repository": {
