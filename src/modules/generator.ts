@@ -24,7 +24,12 @@ const generatorModule = (traceData: any) => {
   content += "\n";
 
   content += "\n";
-  content += 'CMD ["src/index.js"]\n';
+
+  const quotedArgs: Array<string> = traceData.entrypoint.map((argument: string) => {
+    return `\"${argument}\"`;
+  });
+  content += `CMD [${quotedArgs.toString()}]\n`;
+
 
   writeDockerfile(content);
 

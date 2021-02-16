@@ -27,7 +27,7 @@ const traceSystemCalls = (command: string) => new Promise<Array<Syscall>>((resol
   createTemporaryDir();
 
   const tracerProcess: ChildProcess = exec(
-    `strace -f -e trace=network,openat ${command} 2>&1 | grep -E "bind|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
+    `strace -f -e trace=execve,network,openat ${command} 2>&1 | grep -E "execve|bind|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
     { timeout: PROC_TIMEOUT }
   );
 
@@ -52,7 +52,8 @@ const tracerModule = async (command: string) => {
 
   const systemInfo = {
     dependencies: new Array<string>(),
-    ports: new Array<number>()
+    ports: new Array<number>(),
+    entrypoint: new Array<string>()
   }
 
   syscalls.forEach((call) => {
@@ -69,6 +70,15 @@ const tracerModule = async (command: string) => {
 
         const port: number = portData.params[0]
         systemInfo.ports.push(port);
+        break;
+      case 'execve':
+        const argsArray: Array<any> = call.args[1];
+        const result: any = call.result;
+        console.log(call);
+        if (result == 0 && argsArray.includes('node')) {
+          argsArray.shift();
+          systemInfo.entrypoint = argsArray
+        }
         break;
       default:
         break;
