@@ -1,4 +1,5 @@
 import tracerModule from './modules/tracer';
+import inspectorModule from './modules/inspector';
 import imageModule from './modules/image';
 import dependenciesModule from './modules/dependencies';
 import portsModule from './modules/ports';
@@ -7,7 +8,8 @@ import generatorModule from './modules/generator';
 
 export const dockerfileGeneration = async (command: string) => {
   // Module to trace software data
-  const traceData = await tracerModule(command);
+  const tracedData = await tracerModule(command);
+  const inspectedData = inspectorModule();
 
   // Modules to infer dockerfiles fields
   const imageData = imageModule();
@@ -16,7 +18,7 @@ export const dockerfileGeneration = async (command: string) => {
   const entrypointData = entrypointModule();
 
   // Module to generate the dockerfile
-  const generatorData = generatorModule(traceData);
+  const generatorData = generatorModule(tracedData);
 
   return generatorData;
 }
