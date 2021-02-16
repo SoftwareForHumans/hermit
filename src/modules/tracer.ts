@@ -64,7 +64,10 @@ const tracerModule = async (command: string) => {
         systemInfo.dependencies.push(fileName);
         break;
       case 'bind':
-        const port: number = call.args[1]['sin6_port'].params[0]
+        const portData = call.args[1]['sin6_port'];
+        if (portData == undefined) return;
+
+        const port: number = portData.params[0]
         systemInfo.ports.push(port);
         break;
       default:
