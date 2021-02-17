@@ -6,19 +6,24 @@ import portsModule from './modules/ports';
 import entrypointModule from './modules/entrypoint';
 import generatorModule from './modules/generator';
 
+import SystemInfo from './utils/lib/SystemInfo';
+import DockerfileData from './utils/lib/DockerfileData';
+
 export const dockerfileGeneration = async (command: string) => {
   // Module to trace software data
-  const tracedData = await tracerModule(command);
   const inspectedData = inspectorModule();
+  const tracedData: SystemInfo = await tracerModule(command);
 
   // Modules to infer dockerfiles fields
-  const imageData = imageModule();
-  const dependenciesData = dependenciesModule();
-  const portsData = portsModule();
-  const entrypointData = entrypointModule();
+  const dockerfileData: DockerfileData = {
+    images: imageModule(),
+    dependencies: dependenciesModule(tracedData.openat),
+    ports: portsModule(tracedData.bind),
+    entrypoint: entrypointModule(tracedData.execve)
+  }
 
   // Module to generate the dockerfile
-  const generatorData = generatorModule(tracedData);
+  generatorModule(dockerfileData);
 
-  return generatorData;
+  return dockerfileData;
 }

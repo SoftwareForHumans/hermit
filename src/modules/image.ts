@@ -1,7 +1,7 @@
-const imageModule = () => {
+const imageModule = (): Array<string> => {
   //TODO: Develop image module
 
-  return {};
+  return ["node:14", "gcr.io/distroless/nodejs:14"];
 }
 
 export default imageModule;

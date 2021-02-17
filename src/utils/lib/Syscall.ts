@@ -1,4 +1,4 @@
-export interface Syscall {
+export default interface Syscall {
   syscall: string,
   args: Array<any>,
   result: number,

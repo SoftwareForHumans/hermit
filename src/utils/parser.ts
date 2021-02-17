@@ -1,4 +1,4 @@
-import { Syscall } from './lib/syscall'
+import Syscall from './lib/Syscall'
 
 // Import parser from the lib in b3-strace-parser
 const parser = require('b3-strace-parser/lib/parser');
