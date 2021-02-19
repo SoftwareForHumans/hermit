@@ -37,7 +37,7 @@ It is required first to have compiled with the previous command. This scenario o
 
 Run (in any directory):
 ```bash
-node /path/to/root/dist/bin/hermit.js <service_command>
+node /path/to/root/dist/bin/cli.js <service_command>
 ```
 
 This time the directory `tmp/` will be generated in the current directory, where the tool is being executed.
