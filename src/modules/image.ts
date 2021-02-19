@@ -1,7 +1,6 @@
-import { languageMap } from '../languages/javascript'
 
-const imageModule = (): Array<string> => {
-  //TODO: Develop image module
+
+const imageModule = (languageMap: any): Array<string> => {
 
   return [languageMap.imageBuilder, languageMap.imageRunner];
 }

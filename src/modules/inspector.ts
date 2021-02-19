@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path'
 
+import SourceInfo from '../utils/lib/SourceInfo';
+
 const SUPPORTED_LANGUAGES: Array<string> = ['js', 'go', 'py', 'java', 'html', 'css'];
 const INGORED_FOLDERS: Array<string> = ['node_modules'];
 
@@ -9,31 +11,30 @@ const updateCount = (file: string, info: any) => {
   if (SUPPORTED_LANGUAGES.includes(extension)) {
     info.files++;
 
-    if (info.hasOwnProperty(extension)) {
-      info[extension]++;
+    if (info.langs.hasOwnProperty(extension)) {
+      info.langs[extension]++;
     }
     else {
-      info[extension] = 1;
+      info.langs[extension] = 1;
     }
   }
 }
 
 const detectLanguage = (info: any) => {
-  const webValue: number = info.html || 0;
-  if (webValue > 0) {
+  const htmlCount: number = info.langs.html || 0;
+  if (htmlCount > 0) {
     info.language = 'web';
     return;
   }
 
-  const keys = Object.keys(info);
-  keys.shift();
+  const keys = Object.keys(info.langs);
 
   let maxKey = keys[0];
-  let max = info[maxKey];
+  let max = info.langs[maxKey];
 
   for (let i = 1; i < keys.length; i++) {
-    const key = keys[0];
-    const value = info[key];
+    const key = keys[i];
+    const value = info.langs[key];
 
     if (value > max) {
       max = value;
@@ -48,8 +49,10 @@ const inspectorModule = async () => {
   const currDir: string = '.';
   const dirs: Array<string> = [currDir];
 
-  let sourceInfo = {
-    files: 0
+  let sourceInfo: SourceInfo = {
+    files: 0,
+    language: 'null',
+    langs: {}
   };
 
   try {

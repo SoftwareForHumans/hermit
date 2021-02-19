@@ -1,4 +1,4 @@
 export const languageMap = {
-  imageRunner: "golang:1.12",
-  imageBuilder: "gcr.io/distroless/base"
+  imageBuilder: "golang:1.12",
+  imageRunner: "gcr.io/distroless/base"
 };

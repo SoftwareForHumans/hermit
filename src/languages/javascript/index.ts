@@ -1,4 +1,4 @@
 export const languageMap = {
-  imageRunner: "node:14",
-  imageBuilder: "gcr.io/distroless/nodejs:14"
+  imageBuilder: "node:14",
+  imageRunner: "gcr.io/distroless/nodejs:14"
 };
