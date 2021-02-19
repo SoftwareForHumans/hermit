@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path'
 
-const SUPPORTED_LANGUAGES_EXTENSIONS: Array<string> = ['js', 'go', 'py', 'java', 'html', 'css'];
+const SUPPORTED_LANGUAGES: Array<string> = ['js', 'go', 'py', 'java', 'html', 'css'];
+const INGORED_FOLDERS: Array<string> = ['node_modules'];
 
 const updateCount = (file: string, info: any) => {
   const extension: string = file.split('.').pop() || 'null';
-  if (SUPPORTED_LANGUAGES_EXTENSIONS.includes(extension)) {
+  if (SUPPORTED_LANGUAGES.includes(extension)) {
     info.files++;
 
     if (info.hasOwnProperty(extension)) {
@@ -18,9 +19,10 @@ const updateCount = (file: string, info: any) => {
 }
 
 const detectLanguage = (info: any) => {
-  const webValue: number = ((info.html || 0) + (info.css || 0)) / info.files;
-  if (webValue > 0.01) {
+  const webValue: number = info.html || 0;
+  if (webValue > 0) {
     info.language = 'web';
+    return;
   }
 
   const keys = Object.keys(info);
@@ -38,6 +40,7 @@ const detectLanguage = (info: any) => {
       maxKey = key;
     }
   }
+
   info.language = maxKey;
 }
 
@@ -71,7 +74,9 @@ const inspectorModule = async () => {
         }
         else if (stat.isDirectory()) {
           // It's a directory
-          dirs.push(filePath);
+          if (!INGORED_FOLDERS.includes(file)) {
+            dirs.push(filePath);
+          }
         }
 
 
