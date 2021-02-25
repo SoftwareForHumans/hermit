@@ -1,8 +1,5 @@
 
 
-const imageModule = (languageMap: any): Array<string> => {
-
-  return [languageMap.imageBuilder, languageMap.imageRunner];
-}
+const imageModule = (languageImages: any): Array<string> => languageImages;
 
 export default imageModule;

@@ -1,3 +1,5 @@
+let module: any = null;
+
 const languages: Record<string, string> = {
   go: 'golang',
   java: 'java',
@@ -6,10 +8,11 @@ const languages: Record<string, string> = {
   web: 'web'
 };
 
-export const getLanguageMap = async (extension: string) => {
-  const modulePath: string = './' + languages[extension];
-  const { languageMap } = await import(modulePath);
+export const languageData = async (extension: string) => {
+  if (module == null) {
+    const modulePath: string = './' + languages[extension];
+    module = await import(modulePath);
+  }
 
-  return languageMap;
+  return module;
 }
-
