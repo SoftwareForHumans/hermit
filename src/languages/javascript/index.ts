@@ -8,3 +8,5 @@ export const languageDependenciesInstallation = [
 ];
 
 export const languageEnvVars = [];
+
+export const languageRuntime = "node";

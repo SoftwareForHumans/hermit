@@ -17,13 +17,13 @@ export const dockerfileGeneration = async (command: string) => {
   const tracedData: SystemInfo = await tracerModule(command);
 
   // Get Detected Programming Language
-  const { languageImages, languageDependenciesInstallation, languageEnvVars } = await languageData(inspectedData.language);
+  const { languageImages, languageDependenciesInstallation, languageEnvVars, languageRuntime } = await languageData(inspectedData.language);
 
   // Modules to infer dockerfiles fields
   const imageData = imageModule(languageImages);
   const dependenciesData = dependenciesModule(tracedData.openat, languageDependenciesInstallation);
   const portsData = portsModule(tracedData.bind);
-  const entrypointData = entrypointModule(tracedData.execve);
+  const entrypointData = entrypointModule(tracedData.execve, languageRuntime);
 
   // Join Dockerfile Data
   const dockerfileData: DockerfileData = {

@@ -20,7 +20,7 @@ const generatorModule = (dockerfileData: DockerfileData) => {
 
   // Install dependencies
   dockerfileData.dependencies.forEach((step: string) => {
-    content += `RUN ${step}`
+    content += `RUN ${step}\n`
   })
   content += "\n";
 

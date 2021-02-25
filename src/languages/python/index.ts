@@ -13,3 +13,5 @@ export const languageDependenciesInstallation = [
 export const languageEnvVars = [
   `PYTHONPATH=./${LOCAL_SITE_PACKAGES}`
 ];
+
+export const languageRuntime = "python3";

@@ -52,7 +52,7 @@ const traceSystemCalls = (command: string) => new Promise<SystemInfo>((resolve: 
 
   tracerProcess.on('exit', (code) => {
     if (code == null) {
-      console.log(`Process terminated after ${PROC_TIMEOUT} have passed`);
+      console.log(`Process terminated after ${PROC_TIMEOUT} miliseconds have passed`);
     }
     else {
       console.log(`Process finished with code ${code}`);
