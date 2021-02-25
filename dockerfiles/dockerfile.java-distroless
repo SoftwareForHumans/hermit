@@ -1,10 +1,16 @@
-FROM openjdk:11-jdk-slim AS build-env
-ADD . /app/examples
+# Build Stage
+FROM maven:3.5-jdk-8 AS build
+ADD . /app
 WORKDIR /app
-RUN javac examples/*.java
-RUN jar cfe main.jar examples.HelloJava examples/*.class 
 
-FROM gcr.io/distroless/java:11
-COPY --from=build-env /app /app
+RUN mvn -f pom.xml clean package
+
+# Run Stage
+FROM openjdk:8-jre-alpine
+ARG DEPENDENCY=/usr/src/
+COPY --from=build app/target/dependency/BOOT-INF/lib /app/lib
+COPY --from=build app/target/dependency/META-INF /app/META-INF
+COPY --from=build app/target/dependency/BOOT-INF/classes /app
 WORKDIR /app
-CMD ["main.jar"]
+
+CMD ["java","-cp","app:app/lib/*","hello.Application"]
