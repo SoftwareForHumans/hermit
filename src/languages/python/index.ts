@@ -1,4 +1,4 @@
 export const languageMap = {
-  imageBuilder: "python:3-slim",
-  imageRunner: "gcr.io/distroless/python3"
+  imageBuilder: "python:3.8-slim-buster",
+  imageRunner: "python:3.8-slim-buster"
 };
