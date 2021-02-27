@@ -14,7 +14,7 @@ import DockerfileData from './utils/lib/DockerfileData';
 export const dockerfileGeneration = async (command: string) => {
   // Modules to analyse software data
   const inspectedData = await inspectorModule();
-  const tracedData: SystemInfo = await tracerModule(command);
+  const tracedData = await tracerModule(command);
 
   // Get Detected Programming Language
   const { languageImages, languageDependenciesInstallation, languageEnvVars, languageRuntime } = await languageData(inspectedData.language);
@@ -28,7 +28,8 @@ export const dockerfileGeneration = async (command: string) => {
   // Join Dockerfile Data
   const dockerfileData: DockerfileData = {
     images: imageData,
-    dependencies: dependenciesData,
+    systemPackages: dependenciesData.systemDependencies,
+    dependencies: dependenciesData.languagueDependencies,
     ports: portsData,
     entrypoint: entrypointData,
     envVars: languageEnvVars

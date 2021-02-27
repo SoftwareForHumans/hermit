@@ -1,15 +1,57 @@
+import { execSync } from 'child_process';
+
 import Syscall from '../utils/lib/Syscall';
 
-const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<string>): Array<string> => {
-  const dependenciesData: Array<string> = new Array<string>()
+const getPackageName = (library: string) => {
+  try {
+    const packageName: string = execSync(`dpkg -S ${library}`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+
+    return packageName;
+  }
+  catch (e) { }
+
+  try {
+    const packageName: string = execSync(`dpkg -S "$(readlink -f ${library})"`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+
+    return packageName;
+  }
+  catch (e2) { }
+
+  return null;
+}
+
+const isLibrary = (fileName: string) => {
+  return fileName.split('.').includes('so');
+}
+
+const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<string>) => {
+  const analyzedDependencies: Array<string> = new Array<string>()
+  const languageDependencies: Array<string> = new Array<string>()
+  const systemDependencies: Array<string> = new Array<string>()
 
   syscalls.forEach((call) => {
     const fileName: string = call.args[1];
 
-    dependenciesData.push(fileName);
+    if (analyzedDependencies.includes(fileName)) return;
+
+    if (isLibrary(fileName)) {
+      const packageName: string | null = getPackageName(fileName);
+
+      if (packageName != null && !systemDependencies.includes(packageName)) {
+        systemDependencies.push(packageName);
+      }
+    }
+    else {
+      languageDependencies.push(fileName);
+    }
+
+    analyzedDependencies.push(fileName);
   });
 
-  return installationSteps;
+  return {
+    languagueDependencies: languageDependencies,
+    systemDependencies: systemDependencies
+  }
 }
 
 export default dependenciesModule;

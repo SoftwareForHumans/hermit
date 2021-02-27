@@ -8,7 +8,10 @@ const entrypointModule = (syscalls: Array<Syscall>, languageRuntime: string): Ar
     const argsArray: Array<any> = call.args[1];
     const result: any = call.result;
     if (result == 0 && argsArray.includes(languageRuntime)) {
-      argsArray.shift();
+      // The python image requires the exectuble to the entrypoint
+      if (languageRuntime != "python3") {
+        argsArray.shift();
+      }
       entrypointData = argsArray;
     }
   });
