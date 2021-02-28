@@ -1,6 +1,6 @@
 {
   "name": "hermit",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A tool to generate dockerfiles for projects",
   "main": "index.js",
   "scripts": {
