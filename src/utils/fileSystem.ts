@@ -3,6 +3,7 @@ import path from 'path';
 
 export const TEMP_DIR: string = 'tmp';
 export const SYSCALL_LOGS: string = 'syscall.log';
+export const DEBIAN_PACKAGES_LIST: string = 'allpackages.txt';
 export const DOCKERFILE_NAME: string = "Dockerfile";
 
 export const createTemporaryDir = () => {
@@ -20,6 +21,10 @@ export const createTemporaryDir = () => {
 
 export const readSyscallLogs = (): string => (
   fs.readFileSync(`./${TEMP_DIR}/${SYSCALL_LOGS}`, { encoding: 'utf8', flag: 'r' }).toString()
+);
+
+export const readDebianPackages = (): string => (
+  fs.readFileSync(`${__dirname}/res/${DEBIAN_PACKAGES_LIST}`, { encoding: 'utf8', flag: 'r' }).toString()
 );
 
 export const writeDockerfile = (content: string) => {

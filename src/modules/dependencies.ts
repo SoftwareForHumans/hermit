@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 
 import Syscall from '../utils/lib/Syscall';
+import { readDebianPackages } from '../utils/fileSystem';
 
 const getPackageName = (library: string) => {
   try {
@@ -21,6 +22,26 @@ const getPackageName = (library: string) => {
 
 const isLibrary = (fileName: string) => {
   return fileName.split('.').includes('so') && !fileName.includes('python');
+}
+
+const filterPackages = (packagesList: Array<string>) => {
+  const filteredPackages: Array<string> = new Array<string>();
+  const debianPackages: Array<string> = readDebianPackages().split('\n');
+
+  for (let i = 0; i < debianPackages.length; i++) {
+    const debianPackage = debianPackages[i];
+
+    const index = packagesList.indexOf(debianPackage);
+
+    if (index > -1) {
+      filteredPackages.push(debianPackage);
+      packagesList.splice(index, 1);
+
+      if (packagesList.length == 0) break;
+    }
+  }
+
+  return filteredPackages;
 }
 
 const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<string>) => {
@@ -50,7 +71,7 @@ const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<s
 
   return {
     languagueDependencies: installationSteps,
-    systemDependencies: systemDependencies
+    systemDependencies: filterPackages(systemDependencies)
   }
 }
 
