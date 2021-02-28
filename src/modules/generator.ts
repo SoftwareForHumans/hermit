@@ -4,19 +4,33 @@ import DockerfileData from '../utils/lib/DockerfileData';
 
 
 const generatorModule = (dockerfileData: DockerfileData) => {
-  //TODO: Develop generator module
+  let isMultiStage: boolean = dockerfileData.images.length > 1;
+
+  // Dockerfile content
   let content: string = "";
 
   // Start Build Stage Container
   content += "# Build Stage\n";
 
   // Choose base image to build the service
-  content += `FROM ${dockerfileData.images[0]} AS build-env\n`;
+  content += `FROM ${dockerfileData.images[0]} ${isMultiStage ? "AS build-env" : ""}\n`;
 
   // Import service source code
   content += "ADD . /app\n";
   content += "WORKDIR /app\n";
   content += "\n";
+
+  // Install system packages
+  if (dockerfileData.systemPackages.length > 0) {
+    content += "RUN apt-get update && \\\n";
+    content += "\tapt-get install -y --no-install-recommends \\\n";
+    content += "\t";
+
+    dockerfileData.systemPackages.forEach((dep: string) => {
+      content += ` ${dep}`
+    });
+    content += "\n";
+  }
 
   // Install dependencies
   dockerfileData.dependencies.forEach((step: string) => {
@@ -27,12 +41,15 @@ const generatorModule = (dockerfileData: DockerfileData) => {
   // Start Run Stage Container
   content += "# Run Stage\n";
 
-  // Choose base image to run the service
-  content += `FROM ${dockerfileData.images[1]}\n`;
+  if (isMultiStage) {
+    // Choose base image to run the service
+    content += `FROM ${dockerfileData.images[1]}\n`;
 
-  // Copy the service built in the previous stage
-  content += "COPY --from=build-env /app /app\n";
-  content += "WORKDIR /app\n";
+    // Copy the service built in the previous stage
+    content += "COPY --from=build-env /app /app\n";
+    content += "WORKDIR /app\n";
+  }
+
 
   // Expose network ports if needed
   if (dockerfileData.ports.length > 0) {

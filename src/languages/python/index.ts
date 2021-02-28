@@ -1,7 +1,6 @@
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
 export const languageImages = [
-  "python:3.8",
   "python:3.8-slim"
 ];
 

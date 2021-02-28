@@ -16,12 +16,11 @@ const getPackageName = (library: string) => {
     return packageName;
   }
   catch (e2) { }
-
   return null;
 }
 
 const isLibrary = (fileName: string) => {
-  return fileName.split('.').includes('so');
+  return fileName.split('.').includes('so') && !fileName.includes('python');
 }
 
 const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<string>) => {
@@ -39,6 +38,7 @@ const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<s
 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
+        console.log(`Package detected: ${packageName}`);
       }
     }
     else {
@@ -49,7 +49,7 @@ const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<s
   });
 
   return {
-    languagueDependencies: languageDependencies,
+    languagueDependencies: installationSteps,
     systemDependencies: systemDependencies
   }
 }
