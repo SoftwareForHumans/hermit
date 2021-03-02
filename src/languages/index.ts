@@ -11,7 +11,13 @@ const languages: Record<string, string> = {
 export const languageData = async (extension: string) => {
   if (module == null) {
     const modulePath: string = './' + languages[extension];
-    module = await import(modulePath);
+
+    try {
+      module = await import(modulePath);
+    }
+    catch (e) {
+      console.log(`Hermit lacks support for language of extension ${extension}`);
+    }
   }
 
   return module;

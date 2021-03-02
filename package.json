@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node src/bin/cli.ts",
     "build": "tsc && npm run copy-files",
-    "copy-files": "cp -r ./src/utils/res ./dist/utils/res",
+    "copy-files": "cp -r ./src/utils/res ./dist/utils/",
     "hermit": "node dist/bin/cli.js",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },

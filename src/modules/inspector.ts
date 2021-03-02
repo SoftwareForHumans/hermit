@@ -87,7 +87,6 @@ const inspectorModule = async () => {
     }
   }
   catch (e) {
-    // Catch anything bad that happens
     console.error("Error: ", e);
   }
 
