@@ -5,10 +5,8 @@ import dependenciesModule from './modules/dependencies';
 import portsModule from './modules/ports';
 import entrypointModule from './modules/entrypoint';
 import generatorModule from './modules/generator';
+import languageModule from './modules/languages'
 
-import { languageData } from './languages'
-
-import SystemInfo from './utils/lib/SystemInfo';
 import DockerfileData from './utils/lib/DockerfileData';
 
 export const dockerfileGeneration = async (command: string) => {
@@ -16,14 +14,14 @@ export const dockerfileGeneration = async (command: string) => {
   const inspectedData = await inspectorModule();
   const tracedData = await tracerModule(command);
 
-  // Get Detected Programming Language
-  const { languageImages, languageDependenciesInstallation, languageEnvVars, languageRuntime } = await languageData(inspectedData.language);
+  // Load module with strategies more appropriated to the detected Programming Language
+  const languageData = await languageModule(inspectedData.language);
 
   // Modules to infer dockerfiles fields
-  const imageData = imageModule(languageImages);
-  const dependenciesData = dependenciesModule(tracedData.openat, languageDependenciesInstallation);
-  const portsData = portsModule(tracedData.bind);
-  const entrypointData = entrypointModule(tracedData.execve, languageRuntime);
+  const imageData = imageModule(inspectedData, tracedData, languageData);
+  const dependenciesData = dependenciesModule(inspectedData, tracedData, languageData);
+  const portsData = portsModule(inspectedData, tracedData, languageData);
+  const entrypointData = entrypointModule(inspectedData, tracedData, languageData);
 
   // Join Dockerfile Data
   const dockerfileData: DockerfileData = {
@@ -32,7 +30,7 @@ export const dockerfileGeneration = async (command: string) => {
     dependencies: dependenciesData.languagueDependencies,
     ports: portsData,
     entrypoint: entrypointData,
-    envVars: languageEnvVars
+    envVars: languageData.languageEnvVars
   }
 
   // Module to generate the dockerfile

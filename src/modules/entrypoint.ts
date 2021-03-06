@@ -1,6 +1,11 @@
+import SourceInfo from '../utils/lib/SourceInfo';
+import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
 
-const entrypointModule = (syscalls: Array<Syscall>, languageRuntime: string): Array<string> => {
+const entrypointModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any): Array<string> => {
+  const syscalls: Array<Syscall> = tracedData.execve;
+  const languageRuntime: string = languageData.languageRuntime;
+
   let entrypointData: Array<string> = new Array<string>();
 
   syscalls.forEach((call) => {

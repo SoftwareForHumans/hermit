@@ -8,7 +8,7 @@ const languages: Record<string, string> = {
   web: 'web'
 };
 
-export const languageData = async (extension: string) => {
+const languageModule = async (extension: string) => {
   if (module == null) {
     const modulePath: string = './' + languages[extension];
 
@@ -22,3 +22,5 @@ export const languageData = async (extension: string) => {
 
   return module;
 }
+
+export default languageModule;

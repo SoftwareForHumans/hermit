@@ -14,3 +14,5 @@ export const languageEnvVars = [
 ];
 
 export const languageRuntime = "python3";
+
+export const PACKAGES_LIST: string = 'pythonpackages.txt';

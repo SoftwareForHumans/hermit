@@ -1,7 +1,10 @@
 import { execSync } from 'child_process';
 
+import SourceInfo from '../utils/lib/SourceInfo';
+import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
-import { readDebianPackages, readPythonPackages } from '../utils/fileSystem';
+
+import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
 
 const getPackageName = (library: string) => {
   try {
@@ -24,12 +27,12 @@ const isLibrary = (fileName: string) => {
   return fileName.split('.').includes('so') && !fileName.includes('python');
 }
 
-const filterPackages = (packagesList: Array<string>) => {
+const filterPackages = (packagesList: Array<string>, languageData: any) => {
   const installablePackages: Array<string> = new Array<string>();
   const filteredPackages: Array<string> = new Array<string>();
 
   const debianPackages: Array<string> = readDebianPackages();
-  const pythonpackages: Array<string> = readPythonPackages();
+  const pythonpackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
 
   let packagesCount: number = packagesList.length;
 
@@ -53,7 +56,10 @@ const filterPackages = (packagesList: Array<string>) => {
   return filteredPackages;
 }
 
-const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<string>) => {
+const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any) => {
+  const syscalls: Array<Syscall> = tracedData.openat;
+  const installationSteps: Array<string> = languageData.languageDependenciesInstallation;
+
   const analyzedDependencies: Array<string> = new Array<string>()
   const languageDependencies: Array<string> = new Array<string>()
   const systemDependencies: Array<string> = new Array<string>()
@@ -80,7 +86,7 @@ const dependenciesModule = (syscalls: Array<Syscall>, installationSteps: Array<s
 
   return {
     languagueDependencies: installationSteps,
-    systemDependencies: filterPackages(systemDependencies)
+    systemDependencies: filterPackages(systemDependencies, languageData)
   }
 }
 
