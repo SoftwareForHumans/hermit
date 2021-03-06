@@ -43,3 +43,7 @@ node /path/to/root/dist/bin/cli.js <service_command>
 
 This time the directory `tmp/` will be generated in the current directory, where the tool is being executed.
 
+## Current Limitations
+  * At the moment, only works in debian-based linux distributions like Ubuntu or Debian itself.
+  * Users must supply to hermit the command to run the service.
+  * In the case of a statically complied languages, it is also mandatory the supply of the command to to build the service. (NOT IMPLEMENTED YET)
