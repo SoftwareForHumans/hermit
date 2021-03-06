@@ -1,5 +1,6 @@
 # Hermit
-A tool to automatically generate dockerfiles for projects.
+A tool to automatically generate dockerfiles for projects. Just like hermit crabs try to grab the shells that perfectly fit its bodies, being neither to large or to small, `hermit` writes suitable dockerfiles for existing software
+
 ## Dependencies
   * [`Node.js`](https://nodejs.org/): JavaScript runtime environment
   * [`npm`](https://www.npmjs.com/get-npm): Node Package Manager

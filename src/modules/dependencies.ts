@@ -20,6 +20,7 @@ const getPackageName = (library: string) => {
     return packageName;
   }
   catch (e2) { }
+
   return null;
 }
 
