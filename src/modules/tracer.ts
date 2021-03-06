@@ -5,7 +5,7 @@ import { parseLine } from '../utils/parser';
 import Syscall from '../utils/lib/Syscall';
 import SystemInfo from '../utils/lib/SystemInfo';
 
-const PROC_TIMEOUT: number = 60 * 1000;
+const PROC_TIMEOUT: number = 10 * 1000;
 
 const parseProcLogs = (): SystemInfo => {
   const systemInfo: SystemInfo = {

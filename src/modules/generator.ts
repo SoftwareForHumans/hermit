@@ -1,6 +1,7 @@
 import { writeDockerfile } from '../utils/fileSystem'
 
 import DockerfileData from '../utils/lib/DockerfileData';
+import DependencyData from '../utils/lib/DependencyData';
 
 
 const generatorModule = (dockerfileData: DockerfileData) => {
@@ -26,8 +27,8 @@ const generatorModule = (dockerfileData: DockerfileData) => {
     content += "\tapt-get install -y --no-install-recommends \\\n";
     content += "\t";
 
-    dockerfileData.systemPackages.forEach((dep: string) => {
-      content += ` ${dep}`
+    dockerfileData.systemPackages.forEach((dep: DependencyData) => {
+      content += ` ${dep.package}`
     });
     content += "\n";
   }
@@ -47,6 +48,12 @@ const generatorModule = (dockerfileData: DockerfileData) => {
 
     // Copy the service built in the previous stage
     content += "COPY --from=build-env /app /app\n";
+
+    dockerfileData.systemPackages.forEach((dep: DependencyData) => {
+      content += `COPY --from=build-env ${dep.path} ${dep.path}\n`
+    });
+    content += "\n";
+
     content += "WORKDIR /app\n";
   }
 

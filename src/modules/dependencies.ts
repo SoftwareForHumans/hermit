@@ -3,6 +3,7 @@ import { execSync } from 'child_process';
 import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
+import DependencyData from '../utils/lib/DependencyData';
 
 import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
 
@@ -28,9 +29,9 @@ const isLibrary = (fileName: string) => {
   return fileName.split('.').includes('so') && !fileName.includes('python');
 }
 
-const filterPackages = (packagesList: Array<string>, languageData: any) => {
-  const installablePackages: Array<string> = new Array<string>();
-  const filteredPackages: Array<string> = new Array<string>();
+const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any) => {
+  const installablePackages: Array<DependencyData> = new Array<DependencyData>();
+  const filteredPackages: Array<DependencyData> = new Array<DependencyData>();
 
   const debianPackages: Array<string> = readDebianPackages();
   const pythonpackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
@@ -40,16 +41,21 @@ const filterPackages = (packagesList: Array<string>, languageData: any) => {
   for (let i = 0; i < debianPackages.length; i++) {
     const debianPackage = debianPackages[i];
 
-    if (packagesList.includes(debianPackage)) {
-      installablePackages.push(debianPackage);
-      packagesCount--;
+    const index = packagesList.indexOf(debianPackage);
 
+    if (index > -1) {
+      installablePackages.push({
+        package: debianPackage,
+        path: pathsList[index]
+      });
+
+      packagesCount--;
       if (packagesCount == 0) break;
     }
   }
 
   installablePackages.forEach((dep) => {
-    if (!pythonpackages.includes(dep)) {
+    if (!pythonpackages.includes(dep.package)) {
       filteredPackages.push(dep);
     }
   });
@@ -64,6 +70,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
   const analyzedDependencies: Array<string> = new Array<string>()
   const languageDependencies: Array<string> = new Array<string>()
   const systemDependencies: Array<string> = new Array<string>()
+  const pathsList: Array<string> = new Array<string>()
 
   syscalls.forEach((call) => {
     const fileName: string = call.args[1];
@@ -75,6 +82,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
+        pathsList.push(fileName);
         console.log(`Package detected: ${packageName}`);
       }
     }
@@ -87,7 +95,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
 
   return {
     languagueDependencies: installationSteps,
-    systemDependencies: filterPackages(systemDependencies, languageData)
+    systemDependencies: filterPackages(systemDependencies, pathsList, languageData)
   }
 }
 
