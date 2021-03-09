@@ -10,7 +10,11 @@ import languageModule from './modules/languages'
 import DockerfileData from './utils/lib/DockerfileData';
 import HermitOptions from './utils/lib/HermitOptions';
 
-export const dockerfileGeneration = async (command: string, options: HermitOptions) => {
+const defaultOptions: HermitOptions = {
+  multiStage: false
+};
+
+export const dockerfileGeneration = async (command: string, options: HermitOptions = defaultOptions) => {
   // Modules to analyse software data
   const inspectedData = await inspectorModule();
   const tracedData = await tracerModule(command);
@@ -35,7 +39,7 @@ export const dockerfileGeneration = async (command: string, options: HermitOptio
   }
 
   // Module to generate the dockerfile
-  generatorModule(dockerfileData);
+  generatorModule(dockerfileData, options);
 
   return dockerfileData;
 }

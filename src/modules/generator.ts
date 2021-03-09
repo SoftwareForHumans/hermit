@@ -6,7 +6,7 @@ import HermitOptions from '../utils/lib/HermitOptions';
 
 
 const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions) => {
-  let isMultiStage: boolean = options.multiStage ? (dockerfileData.images.length > 1) : false;
+  const isMultiStage: boolean = options.multiStage ? (dockerfileData.images.length > 1) : false;
 
   // Dockerfile content
   let content: string = "";
