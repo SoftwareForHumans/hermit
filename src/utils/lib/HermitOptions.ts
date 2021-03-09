@@ -1,3 +1,4 @@
 export default interface HermitOptions {
-  multiStage: boolean
+  multiStage: boolean,
+  timeout: number,
 }

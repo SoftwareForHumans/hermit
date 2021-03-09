@@ -1,24 +1,31 @@
 import commander from 'commander';
 
-import { dockerfileGeneration } from '../index';
+import { dockerfileGeneration, defaultOptions } from '../index';
 import HermitOptions from '../utils/lib/HermitOptions';
 import { renderTitle } from '../utils/title';
 
 const hermitCLI = async () => {
   renderTitle();
 
+  const version = require('../../package.json').version;
+
   commander
-    .version('0.0.1')
+    .version(version)
     .description("A tool to automatically generate dockerfiles")
     .option('-m, --multi-stage', 'Experimental Feature: Generates Muti-Stage Dockerfiles')
+    .option('-t, --timeout <number>', 'Timeout for the dynamic analysis')
     .parse(process.argv);
 
+
+  const command: string = commander.args.join(" ");
+
   const options: HermitOptions = {
-    multiStage: false
+    multiStage: commander.multiStage || defaultOptions.multiStage,
+    timeout: commander.timeout || defaultOptions.timeout
   };
 
-  //const dockerfileData = await dockerfileGeneration(process.argv[2], options);
-  //console.log(dockerfileData);
+  const dockerfileData = await dockerfileGeneration(command, options);
+  console.log(dockerfileData);
 }
 
 hermitCLI();

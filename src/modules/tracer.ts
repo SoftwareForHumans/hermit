@@ -4,8 +4,7 @@ import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir } from '../
 import { parseLine } from '../utils/parser';
 import Syscall from '../utils/lib/Syscall';
 import SystemInfo from '../utils/lib/SystemInfo';
-
-const PROC_TIMEOUT: number = 10 * 1000;
+import HermitOptions from '../utils/lib/HermitOptions';
 
 const parseProcLogs = (): SystemInfo => {
   const systemInfo: SystemInfo = {
@@ -42,11 +41,13 @@ const parseProcLogs = (): SystemInfo => {
   return systemInfo;
 }
 
-const traceSystemCalls = (command: string) => new Promise<SystemInfo>((resolve: Function, reject: Function) => {
+const traceSystemCalls = (command: string, options: HermitOptions) => new Promise<SystemInfo>((resolve: Function, reject: Function) => {
+  const PROC_TIMEOUT: number = options.timeout * 1000;
+
   createTemporaryDir();
 
   const tracerProcess: ChildProcess = exec(
-    `strace -v -s 200 -f -e trace=execve,network,openat ${command} 2>&1 | grep -E "execve|bind|openat" > ${TEMP_DIR}/${SYSCALL_LOGS}`,
+    `strace -o ${TEMP_DIR}/${SYSCALL_LOGS} -v -s 200 -f -e trace=execve,network,openat ${command}`,
     { timeout: PROC_TIMEOUT }
   );
 
@@ -66,8 +67,8 @@ const traceSystemCalls = (command: string) => new Promise<SystemInfo>((resolve: 
   });
 })
 
-const tracerModule = async (command: string) => {
-  const syscalls: SystemInfo = await traceSystemCalls(command);
+const tracerModule = async (command: string, options: HermitOptions) => {
+  const syscalls: SystemInfo = await traceSystemCalls(command, options);
 
   return syscalls;
 }

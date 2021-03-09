@@ -10,14 +10,15 @@ import languageModule from './modules/languages'
 import DockerfileData from './utils/lib/DockerfileData';
 import HermitOptions from './utils/lib/HermitOptions';
 
-const defaultOptions: HermitOptions = {
-  multiStage: false
+export const defaultOptions: HermitOptions = {
+  multiStage: false,
+  timeout: 60
 };
 
 export const dockerfileGeneration = async (command: string, options: HermitOptions = defaultOptions) => {
   // Modules to analyse software data
   const inspectedData = await inspectorModule();
-  const tracedData = await tracerModule(command);
+  const tracedData = await tracerModule(command, options);
 
   // Load module with strategies more appropriated to the detected Programming Language
   const languageData = await languageModule(inspectedData.language);
