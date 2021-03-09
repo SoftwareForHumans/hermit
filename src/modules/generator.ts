@@ -2,10 +2,11 @@ import { writeDockerfile } from '../utils/fileSystem'
 
 import DockerfileData from '../utils/lib/DockerfileData';
 import DependencyData from '../utils/lib/DependencyData';
+import HermitOptions from '../utils/lib/HermitOptions';
 
 
-const generatorModule = (dockerfileData: DockerfileData) => {
-  let isMultiStage: boolean = dockerfileData.images.length > 1;
+const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions) => {
+  let isMultiStage: boolean = options.multiStage ? (dockerfileData.images.length > 1) : false;
 
   // Dockerfile content
   let content: string = "";

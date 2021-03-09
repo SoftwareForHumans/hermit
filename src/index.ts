@@ -8,8 +8,9 @@ import generatorModule from './modules/generator';
 import languageModule from './modules/languages'
 
 import DockerfileData from './utils/lib/DockerfileData';
+import HermitOptions from './utils/lib/HermitOptions';
 
-export const dockerfileGeneration = async (command: string) => {
+export const dockerfileGeneration = async (command: string, options: HermitOptions) => {
   // Modules to analyse software data
   const inspectedData = await inspectorModule();
   const tracedData = await tracerModule(command);
