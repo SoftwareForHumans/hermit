@@ -1,6 +1,6 @@
 {
   "name": "hermit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A tool to generate dockerfiles for projects",
   "main": "src/index.ts",
   "bin": {
@@ -9,7 +9,9 @@
   "scripts": {
     "start": "ts-node src/bin/cli.ts",
     "build": "tsc && npm run copy-files",
+    "install-hermit": "npm run build && chmod +x dist/bin/cli.js && npm link && npm run setup-hermit",
     "copy-files": "cp -r ./src/utils/res ./dist/utils/",
+    "setup-hermit": "sed -i '1i#!/usr/bin/env node' dist/bin/cli.js",
     "hermit": "node dist/bin/cli.js",
     "test": "mocha -r ts-node/register tests/**/*.test.ts"
   },
@@ -32,22 +34,22 @@
   "homepage": "https://github.com/Raidenkyu/FEUP-DISS#readme",
   "devDependencies": {
     "@types/chai": "^4.2.14",
-    "@types/figlet": "^1.2.1",
     "@types/mocha": "^8.0.4",
     "@typescript-eslint/parser": "^4.11.0",
     "chai": "^4.2.0",
     "eslint": "^7.16.0",
     "eslint-config-google": "^0.14.0",
     "mocha": "^8.2.1",
-    "ts-node": "^9.1.1",
-    "tsc": "^1.20150623.0",
-    "typescript": "^4.1.3"
+    "ts-node": "^9.1.1"
   },
   "dependencies": {
+    "@types/figlet": "^1.2.1",
     "b3-strace-parser": "^0.3.0",
     "chalk": "^2.4.2",
     "commander": "^2.20.3",
     "figlet": "^1.5.0",
+    "tsc": "^1.20150623.0",
+    "typescript": "^4.2.3",
     "winston": "^3.3.3"
   }
 }
