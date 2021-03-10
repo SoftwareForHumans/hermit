@@ -4,6 +4,7 @@ import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
 import DependencyData from '../utils/lib/DependencyData';
+import HermitOptions from '../utils/lib/HermitOptions'
 
 import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
 
@@ -63,7 +64,7 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   return filteredPackages;
 }
 
-const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any) => {
+const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions) => {
   const syscalls: Array<Syscall> = tracedData.openat;
   const installationSteps: Array<string> = languageData.languageDependenciesInstallation;
 

@@ -1,8 +1,9 @@
 import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
+import HermitOptions from '../utils/lib/HermitOptions'
 
-const entrypointModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any): Array<string> => {
+const entrypointModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions): Array<string> => {
   const syscalls: Array<Syscall> = tracedData.execve;
   const languageRuntime: string = languageData.languageRuntime;
 
@@ -13,10 +14,11 @@ const entrypointModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, la
     const argsArray: Array<any> = call.args[1];
     const result: any = call.result;
     if (result == 0 && argsArray.includes(languageRuntime)) {
-      // The python image requires the exectuble to the entrypoint
-      if (languageRuntime != "python3") {
+      // The non-minimalist images require the exectuble to the entrypoint
+      if (options.multiStage) {
         argsArray.shift();
       }
+
       entrypointData = argsArray;
     }
   });

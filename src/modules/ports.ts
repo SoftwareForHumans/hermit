@@ -1,9 +1,9 @@
 import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
+import HermitOptions from '../utils/lib/HermitOptions'
 
-
-const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _languageData: any): Array<number> => {
+const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _languageData: any, _options: HermitOptions): Array<number> => {
   const syscalls: Array<Syscall> = tracedData.bind;
   const portsData: Array<number> = new Array<number>()
 
