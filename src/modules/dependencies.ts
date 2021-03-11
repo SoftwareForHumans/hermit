@@ -35,7 +35,7 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   const filteredPackages: Array<DependencyData> = new Array<DependencyData>();
 
   const debianPackages: Array<string> = readDebianPackages();
-  const pythonpackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
+  const languagepackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
 
   let packagesCount: number = packagesList.length;
 
@@ -56,7 +56,7 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   }
 
   installablePackages.forEach((dep) => {
-    if (!pythonpackages.includes(dep.package)) {
+    if (!languagepackages.includes(dep.package)) {
       filteredPackages.push(dep);
     }
   });
@@ -64,7 +64,7 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   return filteredPackages;
 }
 
-const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions) => {
+const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, _options: HermitOptions) => {
   const syscalls: Array<Syscall> = tracedData.openat;
   const installationSteps: Array<string> = languageData.languageDependenciesInstallation;
 

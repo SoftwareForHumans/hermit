@@ -6,5 +6,6 @@ export default interface DockerfileData {
   dependencies: Array<string>,
   ports: Array<number>,
   entrypoint: Array<string>,
-  envVars: Array<string>
+  envVars: Array<string>,
+  filesIgnored: Array<string>
 }

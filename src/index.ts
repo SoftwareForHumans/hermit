@@ -9,6 +9,7 @@ import languageModule from './modules/languages'
 
 import DockerfileData from './utils/lib/DockerfileData';
 import HermitOptions from './utils/lib/HermitOptions';
+import { filesIgnored } from './modules/languages/javascript';
 
 // Default Options
 export const defaultOptions: HermitOptions = {
@@ -43,7 +44,8 @@ export const dockerfileGeneration = async (command: string, suppliedOptions: any
     dependencies: dependenciesData.languagueDependencies,
     ports: portsData,
     entrypoint: entrypointData,
-    envVars: languageData.languageEnvVars
+    envVars: languageData.languageEnvVars,
+    filesIgnored: languageData.filesIgnored
   }
 
   // Module to generate the dockerfile

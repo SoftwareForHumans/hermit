@@ -1,7 +1,8 @@
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
 export const languageImages = [
-  "python:3.8-slim"
+  "python:3.8-slim",
+  "gcr.io/distroless/python3"
 ];
 
 export const languageDependenciesInstallation = [
@@ -16,3 +17,7 @@ export const languageEnvVars = [
 export const languageRuntime = "python3";
 
 export const PACKAGES_LIST: string = 'pythonpackages.txt';
+
+export const filesIgnored = [
+  "__pycache__"
+];

@@ -1,4 +1,4 @@
-import { writeDockerfile } from '../utils/fileSystem'
+import { writeDockerfile, writeDockerignore } from '../utils/fileSystem'
 
 import DockerfileData from '../utils/lib/DockerfileData';
 import DependencyData from '../utils/lib/DependencyData';
@@ -87,6 +87,10 @@ const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions)
 
   // Write Dockerfile
   writeDockerfile(content);
+
+  // Write .dockerignore
+  writeDockerignore(dockerfileData.filesIgnored.join('\n'));
+
   return;
 }
 

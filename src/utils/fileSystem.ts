@@ -4,6 +4,7 @@ import path from 'path';
 export const TEMP_DIR: string = 'tmp';
 export const SYSCALL_LOGS: string = 'syscall.log';
 export const DOCKERFILE_NAME: string = "Dockerfile";
+export const DOCKERIGNORE_NAME: string = ".dockerignore";
 
 export const DEBIAN_PACKAGES_LIST: string = 'allpackages.txt';
 
@@ -43,5 +44,14 @@ export const writeDockerfile = (content: string) => {
       return
     }
     console.log('Dockerfile created successfully!');
+  })
+}
+
+export const writeDockerignore = (content: string) => {
+  fs.writeFile(DOCKERIGNORE_NAME, content, (err) => {
+    if (err) {
+      console.error(err)
+      return
+    }
   })
 }

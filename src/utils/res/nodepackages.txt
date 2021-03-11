@@ -270,6 +270,7 @@ libpython3.5-stdlib
 libquadmath0
 libreadline-dev
 libreadline7
+libbrotli1
 librsvg2-2
 librsvg2-common
 librsvg2-dev
