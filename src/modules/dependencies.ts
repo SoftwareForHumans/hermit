@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
-import DependencyData from '../utils/lib/DependencyData';
+import DependenciesData from '../utils/lib/DependenciesData';
 import HermitOptions from '../utils/lib/HermitOptions'
 
 import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
@@ -30,9 +30,10 @@ const isLibrary = (fileName: string) => {
   return fileName.split('.').includes('so') && !fileName.includes('python');
 }
 
-const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any) => {
-  const installablePackages: Array<DependencyData> = new Array<DependencyData>();
-  const filteredPackages: Array<DependencyData> = new Array<DependencyData>();
+const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any): DependenciesData => {
+  const installablePackages: Array<string> = new Array<string>();
+  const filteredPackages: Array<string> = new Array<string>();
+  const librariesPath: Array<string> = new Array<string>();
 
   const debianPackages: Array<string> = readDebianPackages();
   const languagepackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
@@ -45,10 +46,9 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
     const index = packagesList.indexOf(debianPackage);
 
     if (index > -1) {
-      installablePackages.push({
-        package: debianPackage,
-        path: pathsList[index]
-      });
+      installablePackages.push(debianPackage);
+
+      librariesPath.push(`/usr${pathsList[index]}`);
 
       packagesCount--;
       if (packagesCount == 0) break;
@@ -56,12 +56,15 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   }
 
   installablePackages.forEach((dep) => {
-    if (!languagepackages.includes(dep.package)) {
+    if (!languagepackages.includes(dep)) {
       filteredPackages.push(dep);
     }
   });
 
-  return filteredPackages;
+  return {
+    packages: filteredPackages,
+    libraries: librariesPath
+  };
 }
 
 const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, _options: HermitOptions) => {

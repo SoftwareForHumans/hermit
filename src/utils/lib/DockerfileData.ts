@@ -1,8 +1,8 @@
-import DependencyData from './DependencyData';
+import DependenciesData from './DependenciesData';
 
 export default interface DockerfileData {
   images: Array<string>,
-  systemPackages: Array<DependencyData>,
+  systemPackages: DependenciesData,
   dependencies: Array<string>,
   ports: Array<number>,
   entrypoint: Array<string>,

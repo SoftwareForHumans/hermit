@@ -1,8 +1,9 @@
 import { writeDockerfile, writeDockerignore } from '../utils/fileSystem'
 
 import DockerfileData from '../utils/lib/DockerfileData';
-import DependencyData from '../utils/lib/DependencyData';
+import DependencyData from '../utils/lib/DependenciesData';
 import HermitOptions from '../utils/lib/HermitOptions';
+import { setSyntheticTrailingComments } from 'typescript';
 
 
 const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions) => {
@@ -23,13 +24,15 @@ const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions)
   content += "\n";
 
   // Install system packages
-  if (dockerfileData.systemPackages.length > 0) {
+  const systemPackages = dockerfileData.systemPackages;
+
+  if (systemPackages.packages.length > 0) {
     content += "RUN apt-get update && \\\n";
     content += "\tapt-get install -y --no-install-recommends \\\n";
     content += "\t";
 
-    dockerfileData.systemPackages.forEach((dep: DependencyData) => {
-      content += ` ${dep.package}`
+    systemPackages.packages.forEach((dep: string) => {
+      content += ` ${dep}`
     });
     content += "\n";
   }
@@ -50,8 +53,8 @@ const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions)
     // Copy the service built in the previous stage
     content += "COPY --from=build-env /app /app\n";
 
-    dockerfileData.systemPackages.forEach((dep: DependencyData) => {
-      content += `COPY --from=build-env ${dep.path} ${dep.path}\n`
+    systemPackages.libraries.forEach((lib: string) => {
+      content += `COPY --from=build-env ${lib} ${lib}\n`
     });
     content += "\n";
 
