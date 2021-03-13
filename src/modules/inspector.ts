@@ -90,8 +90,6 @@ const inspectorModule = async () => {
   }
 
   detectLanguage(sourceInfo);
-  logger.info(sourceInfo);
-
   console.log(sourceInfo);
 
   return sourceInfo;
