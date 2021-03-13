@@ -2,14 +2,19 @@ import SourceInfo from '../utils/lib/SourceInfo';
 import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
 import HermitOptions from '../utils/lib/HermitOptions'
-import { args } from 'commander';
 
-const entrypointModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions): Array<string> => {
+const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions): Array<string> => {
+  let entrypointData: Array<string> = new Array<string>();
+
+  if (inspectedData.scripts.start != undefined) {
+    entrypointData = inspectedData.scripts.start.split(" ");
+
+    return entrypointData;
+  }
+
   const syscalls: Array<Syscall> = tracedData.execve;
   const languageRuntime: string = languageData.languageRuntime;
   const currentPath: string | undefined = process.env.PWD;
-
-  let entrypointData: Array<string> = new Array<string>();
 
   syscalls.forEach((call) => {
     const argsArray: Array<any> = call.args[1];

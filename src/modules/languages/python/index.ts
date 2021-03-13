@@ -1,3 +1,5 @@
+import SourceInfo from '../../../utils/lib/SourceInfo';
+
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
 export const languageImages = [
@@ -21,3 +23,5 @@ export const PACKAGES_LIST: string = 'pythonpackages.txt';
 export const filesIgnored = [
   "__pycache__"
 ];
+
+export const languageStaticInspection = (info: SourceInfo) => { };

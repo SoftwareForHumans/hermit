@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path'
 
 import SourceInfo from '../utils/lib/SourceInfo';
+import logger from '../utils/logger';
 
 const SUPPORTED_LANGUAGES: Array<string> = ['js', 'go', 'py', 'java', 'html', 'css'];
 const INGORED_FOLDERS: Array<string> = ['node_modules'];
@@ -21,11 +22,11 @@ const updateCount = (file: string, info: any) => {
 }
 
 const detectLanguage = (info: any) => {
-  // const htmlCount: number = info.langs.html || 0;
-  // if (htmlCount > 0) {
-  //   info.language = 'web';
-  //   return;
-  // }
+  const htmlCount: number = info.langs.html || 0;
+  if (htmlCount > 0) {
+    info.web = true;
+    return;
+  }
 
   const keys = Object.keys(info.langs);
 
@@ -52,6 +53,8 @@ const inspectorModule = async () => {
   let sourceInfo: SourceInfo = {
     files: 0,
     language: 'null',
+    web: false,
+    scripts: {},
     langs: {}
   };
 
@@ -87,11 +90,11 @@ const inspectorModule = async () => {
     }
   }
   catch (e) {
-    console.error("Error: ", e);
+    logger.error(e);
   }
 
   detectLanguage(sourceInfo);
-  console.log(sourceInfo);
+  logger.info(sourceInfo);
 
   return sourceInfo;
 }
