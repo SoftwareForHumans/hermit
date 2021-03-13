@@ -30,6 +30,7 @@ export const dockerfileGeneration = async (command: string, suppliedOptions: any
 
   // Load module with strategies more appropriated to the detected Programming Language
   const languageData = await languageModule(inspectedData.language);
+  languageData.languageStaticInspection(inspectedData);
 
   // Modules to infer dockerfiles fields
   const imageData = imageModule(inspectedData, tracedData, languageData, options);

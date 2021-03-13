@@ -22,11 +22,7 @@ const updateCount = (file: string, info: any) => {
 }
 
 const detectLanguage = (info: any) => {
-  const htmlCount: number = info.langs.html || 0;
-  if (htmlCount > 0) {
-    info.web = true;
-    return;
-  }
+  if ((info.langs.html || 0) > 0) info.web = true;
 
   const keys = Object.keys(info.langs);
 
@@ -95,6 +91,8 @@ const inspectorModule = async () => {
 
   detectLanguage(sourceInfo);
   logger.info(sourceInfo);
+
+  console.log(sourceInfo);
 
   return sourceInfo;
 }

@@ -30,8 +30,8 @@ export const languageStaticInspection = (info: SourceInfo) => {
 
     if (scripts == undefined) return;
 
-    for (let [key, script] of Object.entries(scripts)) {
-      info.scripts[key] = <string>script;
+    for (let [key, _script] of Object.entries(scripts)) {
+      info.scripts[key] = `npm ${key}`;
     }
 
   }

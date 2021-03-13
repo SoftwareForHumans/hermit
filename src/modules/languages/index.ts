@@ -1,5 +1,7 @@
 let module: any = null;
 
+import logger from '../../utils/logger';
+
 const languages: Record<string, string> = {
   go: 'golang',
   java: 'java',
@@ -16,7 +18,7 @@ const languageModule = async (extension: string) => {
       module = await import(modulePath);
     }
     catch (e) {
-      console.log(`Hermit lacks support for language of extension ${extension}`);
+      logger.error(`Hermit lacks support for language of extension ${extension}`);
     }
   }
 

@@ -1,4 +1,5 @@
 import Syscall from './lib/Syscall'
+import logger from './logger';
 
 // Import parser from the lib in b3-strace-parser
 const parser = require('b3-strace-parser/lib/parser');
@@ -13,15 +14,16 @@ export const parseLine = (line: string): Syscall | null => {
 
     let parsed: Syscall = parser.parseLine(line, { debug: true });
     return parsed;
-  } catch (e) {
+  }
+  catch (e) {
     switch (true) {
       case e instanceof errors.UnfinishedSyscallException:
-        console.log('Encountered partial syscall, skipping: ' + line);
+        logger.warn('Encountered partial syscall, skipping: ' + line);
         // suppress
         return null;
     }
 
-    console.log('[PARSE ERROR] ' + e);
+    logger.warn(e);
 
     return null;
   }

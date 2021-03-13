@@ -6,7 +6,7 @@ import HermitOptions from '../utils/lib/HermitOptions'
 const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions): Array<string> => {
   let entrypointData: Array<string> = new Array<string>();
 
-  if (inspectedData.scripts.start != undefined) {
+  if (inspectedData.scripts.start != undefined && !options.multiStage) {
     entrypointData = inspectedData.scripts.start.split(" ");
 
     return entrypointData;

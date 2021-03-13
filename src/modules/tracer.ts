@@ -6,6 +6,16 @@ import Syscall from '../utils/lib/Syscall';
 import SystemInfo from '../utils/lib/SystemInfo';
 import HermitOptions from '../utils/lib/HermitOptions';
 
+const PROGRAMS_BLACKLIST: Array<string> = ["google-chrome-stable"];
+
+const isBlacklisted = (program: string) => {
+  for (const p in PROGRAMS_BLACKLIST) {
+    if (program.includes(p)) return true
+  };
+
+  return false;
+}
+
 const parseProcLogs = (): SystemInfo => {
   const systemInfo: SystemInfo = {
     openat: new Array<Syscall>(),
@@ -14,6 +24,8 @@ const parseProcLogs = (): SystemInfo => {
   }
 
   const logs: string = readSyscallLogs();
+  const pids: Array<number> = new Array<number>();
+  const pidBlacklist: Array<number> = new Array<number>();
 
   logs.split('\n').forEach((line: string) => {
 
@@ -23,6 +35,10 @@ const parseProcLogs = (): SystemInfo => {
 
     const syscallName: string = syscall.syscall;
 
+    if (!pids.includes(syscall.pid)) pids.push(syscall.pid);
+
+    if (pidBlacklist.includes(syscall.pid)) return;
+
     switch (syscallName) {
       case 'openat':
         systemInfo.openat.push(syscall);
@@ -31,11 +47,23 @@ const parseProcLogs = (): SystemInfo => {
         systemInfo.bind.push(syscall);
         break;
       case 'execve':
+        if (isBlacklisted(syscall.args[0])) {
+          pidBlacklist.push(syscall.pid);
+          return;
+        }
+
         systemInfo.execve.push(syscall);
         break;
       default:
         break;
     }
+  });
+
+  pids.forEach((pid) => {
+    try {
+      process.kill(pid);
+    }
+    catch (e) { }
   });
 
   return systemInfo;
