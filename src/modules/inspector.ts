@@ -21,11 +21,11 @@ const updateCount = (file: string, info: any) => {
 }
 
 const detectLanguage = (info: any) => {
-  const htmlCount: number = info.langs.html || 0;
-  if (htmlCount > 0) {
-    info.language = 'web';
-    return;
-  }
+  // const htmlCount: number = info.langs.html || 0;
+  // if (htmlCount > 0) {
+  //   info.language = 'web';
+  //   return;
+  // }
 
   const keys = Object.keys(info.langs);
 

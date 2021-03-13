@@ -8,13 +8,26 @@ const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _langua
   const portsData: Array<number> = new Array<number>()
 
   syscalls.forEach((call) => {
-
     const portData = call.args[1]['sin6_port'];
-    if (portData == undefined) return;
 
-    const port: number = portData.params[0]
-    portsData.push(port);
+    if (portData != undefined) {
+      const port: number = portData.params[0];
 
+      if (portsData.includes(port)) return;
+
+      portsData.push(port);
+    }
+    else {
+      const portData = call.args[1]['sin_port'];
+
+      if (portData != undefined) {
+        const port: number = portData.params[0];
+
+        if (portsData.includes(port)) return;
+
+        portsData.push(port);
+      }
+    }
   });
 
   return portsData;

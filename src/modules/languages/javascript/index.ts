@@ -11,7 +11,6 @@ export const languageEnvVars = [];
 
 export const languageRuntime = "node";
 
-
 export const PACKAGES_LIST: string = 'nodepackages.txt';
 
 export const filesIgnored = [
