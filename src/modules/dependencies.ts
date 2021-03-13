@@ -7,6 +7,7 @@ import DependenciesData from '../utils/lib/DependenciesData';
 import HermitOptions from '../utils/lib/HermitOptions'
 
 import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
+import logger from '../utils/logger';
 
 const getPackageName = (library: string) => {
   try {
@@ -87,7 +88,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
         pathsList.push(fileName);
-        console.log(`Package detected: ${packageName}`);
+        logger.info(`Package ${packageName} detected`);
       }
     }
     else {

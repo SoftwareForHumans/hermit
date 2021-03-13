@@ -2,6 +2,7 @@ import { ChildProcess, exec } from 'child_process';
 
 import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir } from '../utils/fileSystem';
 import { parseLine } from '../utils/parser';
+import logger from '../utils/logger';
 import Syscall from '../utils/lib/Syscall';
 import SystemInfo from '../utils/lib/SystemInfo';
 import HermitOptions from '../utils/lib/HermitOptions';
@@ -81,10 +82,10 @@ const traceSystemCalls = (command: string, options: HermitOptions) => new Promis
 
   tracerProcess.on('exit', (code) => {
     if (code == null) {
-      console.log(`Process terminated after ${PROC_TIMEOUT} miliseconds have passed`);
+      logger.info(`Process terminated after ${PROC_TIMEOUT} miliseconds have passed`);
     }
     else {
-      console.log(`Process finished with code ${code}`);
+      logger.info(`Process finished with code ${code}`);
     }
 
     resolve(parseProcLogs());

@@ -23,7 +23,7 @@ const logger = winston.createLogger({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp(),
-        winston.format.printf(info => `${info.level}: ${info.message}`)
+        winston.format.printf(info => `${info.level} ${info.message}`)
       )
     })
   ]
