@@ -97,6 +97,10 @@ const traceSystemCalls = (command: string, options: HermitOptions) => new Promis
 })
 
 const tracerModule = async (command: string, options: HermitOptions) => {
+  if (options.container) {
+    // TODO: docker run -v <host_path>:<container_path> $(docker build -q .)
+  }
+
   const syscalls: SystemInfo = await traceSystemCalls(command, options);
 
   return syscalls;

@@ -14,14 +14,18 @@ import { filesIgnored } from './modules/languages/javascript';
 // Default Options
 export const defaultOptions: HermitOptions = {
   multiStage: false,
-  timeout: 60
+  timeout: 60,
+  path: process.env.PWD || '.',
+  container: false
 };
 
 export const dockerfileGeneration = async (command: string, suppliedOptions: any = {}) => {
   // Set the options
   const options: HermitOptions = {
     multiStage: suppliedOptions.multiStage || defaultOptions.multiStage,
-    timeout: suppliedOptions.timeout || defaultOptions.timeout
+    timeout: suppliedOptions.timeout || defaultOptions.timeout,
+    path: suppliedOptions.path || defaultOptions.path,
+    container: suppliedOptions.container || defaultOptions.container
   };
 
   // Modules to analyse software data

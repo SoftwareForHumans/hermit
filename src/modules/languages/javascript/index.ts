@@ -1,5 +1,5 @@
-import { unescapeLeadingUnderscores } from 'typescript';
 import SourceInfo from '../../../utils/lib/SourceInfo';
+import HermitOptions from '../../../utils/lib/HermitOptions';
 import logger from '../../../utils/logger';
 
 export const languageImages = [
@@ -21,8 +21,8 @@ export const filesIgnored = [
   "node_modules"
 ];
 
-export const languageStaticInspection = (info: SourceInfo) => {
-  const path = process.env.PWD;
+export const languageStaticInspection = (info: SourceInfo, options: HermitOptions) => {
+  const path = options.path;
 
   try {
     const packageJson = require(`${path}/package.json`);

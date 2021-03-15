@@ -14,6 +14,8 @@ const hermitCLI = async () => {
     .description("A tool to automatically generate dockerfiles")
     .option('-m, --multi-stage', 'Experimental Feature: Generates Muti-Stage Dockerfiles')
     .option('-t, --timeout <number>', 'Timeout for the dynamic analysis')
+    .option('-p, --path <string>', 'Path to the project directory')
+    .option('-c, --container', 'Uses dynamic analysis in containerized projects')
     .parse(process.argv);
 
 
@@ -21,7 +23,9 @@ const hermitCLI = async () => {
 
   const options: HermitOptions = {
     multiStage: commander.multiStage || defaultOptions.multiStage,
-    timeout: commander.timeout || defaultOptions.timeout
+    timeout: commander.timeout || defaultOptions.timeout,
+    path: commander.path || defaultOptions.path,
+    container: commander.container || defaultOptions.container
   };
 
   const dockerfileData = await dockerfileGeneration(command, options);

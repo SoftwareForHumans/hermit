@@ -14,7 +14,7 @@ const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, lan
 
   const syscalls: Array<Syscall> = tracedData.execve;
   const languageRuntime: string = languageData.languageRuntime;
-  const currentPath: string | undefined = process.env.PWD;
+  const currentPath: string = options.path;
 
   syscalls.forEach((call) => {
     const argsArray: Array<any> = call.args[1];
