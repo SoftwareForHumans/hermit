@@ -11,13 +11,17 @@ const hermitCLI = async () => {
 
   commander
     .version(version)
-    .description("A tool to automatically generate dockerfiles")
+    .arguments('<command>')
+    .description("A tool to automatically generate dockerfiles", {
+      command: 'The command to start the service'
+    })
     .option('-m, --multi-stage', 'Experimental Feature: Generates Muti-Stage Dockerfiles')
     .option('-t, --timeout <number>', 'Timeout for the dynamic analysis')
     .option('-p, --path <string>', 'Path to the project directory')
     .option('-c, --container', 'Uses dynamic analysis in containerized projects')
     .parse(process.argv);
 
+  if (commander.args.length === 0) commander.help();
 
   const command: string = commander.args.join(" ");
 
