@@ -4,6 +4,7 @@ import path from 'path';
 export const TEMP_DIR: string = 'tmp';
 export const SYSCALL_LOGS: string = 'syscall.log';
 export const DOCKERFILE_NAME: string = "Dockerfile";
+export const DOCKERFILE_STRACE_NAME: string = "Dockerfile.strace";
 export const DOCKERIGNORE_NAME: string = ".dockerignore";
 
 export const DEBIAN_PACKAGES_LIST: string = 'allpackages.txt';
@@ -37,15 +38,26 @@ export const readLanguagePackages = (languagePackagesFile: string): Array<string
   readPackagesFile(languagePackagesFile).split('\n')
 );
 
-export const writeDockerfile = (content: string) => {
-  fs.writeFile(DOCKERFILE_NAME, content, (err) => {
-    if (err) {
-      console.error(err)
-      return
-    }
+export const readDockerfile = (dockerfilePath: string) => (
+  fs.readFileSync(dockerfilePath, { encoding: 'utf8', flag: 'r' }).toString().split('\n')
+);
+
+const writeDockerfileTemplate = (dockerfileName: string, content: string) => {
+  try {
+    fs.writeFileSync(dockerfileName, content);
+  }
+  catch (e) {
     console.log('Dockerfile created successfully!');
-  })
+  }
 }
+
+export const writeDockerfile = (content: string) => (
+  writeDockerfileTemplate(DOCKERFILE_NAME, content)
+)
+
+export const writeDockerfileStrace = (content: string) => (
+  writeDockerfileTemplate(DOCKERFILE_STRACE_NAME, content)
+)
 
 export const writeDockerignore = (content: string) => {
   fs.writeFile(DOCKERIGNORE_NAME, content, (err) => {

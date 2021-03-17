@@ -21,8 +21,6 @@ const hermitCLI = async () => {
     .option('-c, --container', 'Uses dynamic analysis in containerized projects')
     .parse(process.argv);
 
-  if (commander.args.length === 0) commander.help();
-
   const command: string = commander.args.join(" ");
 
   const options: HermitOptions = {
@@ -31,6 +29,8 @@ const hermitCLI = async () => {
     path: commander.path || defaultOptions.path,
     container: commander.container || defaultOptions.container
   };
+
+  if (commander.args.length === 0 && !options.container) commander.help();
 
   const dockerfileData = await dockerfileGeneration(command, options);
   console.log(dockerfileData);

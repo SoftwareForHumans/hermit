@@ -1,6 +1,7 @@
 import { ChildProcess, exec } from 'child_process';
+import path from 'path'
 
-import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir } from '../utils/fileSystem';
+import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir, readDockerfile, writeDockerfileStrace } from '../utils/fileSystem';
 import { parseLine } from '../utils/parser';
 import logger from '../utils/logger';
 import Syscall from '../utils/lib/Syscall';
@@ -96,9 +97,43 @@ const traceSystemCalls = (command: string, options: HermitOptions) => new Promis
   });
 })
 
+const traceContainerSyscalls = (options: HermitOptions) => {
+  const dockerfilePath = path.join(options.path, 'Dockerfile');
+  const dockerfileLines = readDockerfile(dockerfilePath);
+
+  let workdir: string = "";
+  let cmdIndex: number = -1;
+
+  for (let i = 0; i < dockerfileLines.length; i++) {
+    let line = dockerfileLines[i];
+
+    if (line.includes("WORKDIR")) {
+      workdir = line.replace("WORKDIR", "");
+    }
+
+    if (line.includes("CMD")) {
+      cmdIndex = i;
+      const cmdRegex = RegExp('\\[.*?\\]').exec(line);
+      if (cmdRegex == null) throw new Error('Dockerfile has no enrypoint');
+
+      const parsedCmd = JSON.parse(cmdRegex[0]);
+      const newEntrypoint = ['strace', `-o ${TEMP_DIR}/${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,openat']
+        .concat(parsedCmd);
+
+      dockerfileLines[cmdIndex] = `${line.replace(cmdRegex[0], "")}${JSON.stringify(newEntrypoint)}`;
+    }
+  };
+
+  dockerfileLines.splice(cmdIndex - 1, 0, "RUN apt install -y strace\nRUN mkdir tmp");
+
+  writeDockerfileStrace(dockerfileLines.join('\n'));
+}
+
 const tracerModule = async (command: string, options: HermitOptions) => {
   if (options.container) {
-    // TODO: docker run -v `pwd`:<WORKDIR> $(docker build -q .)
+    // TODO: docker run -v `pwd`:<WORKDIR> $(docker build -q Dockerfile.strace)
+    traceContainerSyscalls(options);
+    process.exit();
   }
 
   const syscalls: SystemInfo = await traceSystemCalls(command, options);
