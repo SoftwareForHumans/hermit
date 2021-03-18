@@ -42,6 +42,7 @@ const parseProcLogs = (): SystemInfo => {
     if (pidBlacklist.includes(syscall.pid)) return;
 
     switch (syscallName) {
+      case 'open':
       case 'openat':
         systemInfo.openat.push(syscall);
         break;
@@ -117,7 +118,7 @@ const traceContainerSyscalls = (options: HermitOptions) => {
       if (cmdRegex == null) throw new Error('Dockerfile has no enrypoint');
 
       const parsedCmd = JSON.parse(cmdRegex[0]);
-      const newEntrypoint = ['strace', `-o ${TEMP_DIR}/${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,openat']
+      const newEntrypoint = ['strace', `-o ${TEMP_DIR}/${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,open,openat']
         .concat(parsedCmd);
 
       dockerfileLines[cmdIndex] = `${line.replace(cmdRegex[0], "")}${JSON.stringify(newEntrypoint)}`;
@@ -131,7 +132,7 @@ const traceContainerSyscalls = (options: HermitOptions) => {
 
 const tracerModule = async (command: string, options: HermitOptions) => {
   if (options.container) {
-    // TODO: docker run -v `pwd`:<WORKDIR> $(docker build -q Dockerfile.strace)
+    // TODO: docker run -v `pwd`:/<WORKDIR> $(docker build -q -f Dockerfile.strace .)
     traceContainerSyscalls(options);
     process.exit();
   }
