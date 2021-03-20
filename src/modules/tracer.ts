@@ -1,5 +1,6 @@
 import { ChildProcess, exec } from 'child_process';
 import path from 'path'
+import { buildImage, createContainer, removeImage } from '../utils/containers';
 
 import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir, readDockerfile, writeDockerfileStrace } from '../utils/fileSystem';
 import { parseLine } from '../utils/parser';
@@ -98,7 +99,7 @@ const traceSystemCalls = (command: string, options: HermitOptions) => new Promis
   });
 })
 
-const traceContainerSyscalls = (options: HermitOptions) => {
+const injectStraceContainer = (options: HermitOptions) => {
   const dockerfilePath = path.join(options.path, 'Dockerfile');
   const dockerfileLines = readDockerfile(dockerfilePath);
 
@@ -128,12 +129,28 @@ const traceContainerSyscalls = (options: HermitOptions) => {
   dockerfileLines.splice(cmdIndex - 1, 0, "RUN apt install -y strace\nRUN mkdir tmp");
 
   writeDockerfileStrace(dockerfileLines.join('\n'));
+
+  return workdir;
+}
+
+const traceContainerSyscalls = async (workdir: string, options: HermitOptions) => {
+  const imageId = await buildImage(options);
+
+  const container = await createContainer(imageId);
+
+  container.start();
+  await new Promise((resolve) => setTimeout(resolve, options.timeout * 1000));
+  container.remove();
+
+  removeImage(imageId);
 }
 
 const tracerModule = async (command: string, options: HermitOptions) => {
   if (options.container) {
     // TODO: docker run -v `pwd`:/<WORKDIR> $(docker build -q -f Dockerfile.strace .)
-    traceContainerSyscalls(options);
+    const workdir = injectStraceContainer(options);
+    await traceContainerSyscalls(workdir, options);
+
     process.exit();
   }
 
