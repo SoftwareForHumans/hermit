@@ -78,7 +78,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
   const pathsList: Array<string> = new Array<string>()
 
   syscalls.forEach((call) => {
-    const fileName: string = call.args[1];
+    const fileName: string = (call.syscall === "openat") ? call.args[1] : call.args[0];
 
     if (analyzedDependencies.includes(fileName)) return;
 

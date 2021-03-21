@@ -5,8 +5,6 @@ import HermitOptions from '../utils/lib/HermitOptions';
 import { renderTitle } from '../utils/title';
 
 const hermitCLI = async () => {
-  renderTitle();
-
   const version = require('../../package.json').version;
 
   commander
@@ -20,6 +18,8 @@ const hermitCLI = async () => {
     .option('-p, --path <string>', 'Path to the project directory')
     .option('-c, --container', 'Uses dynamic analysis in containerized projects')
     .parse(process.argv);
+
+  renderTitle();
 
   const command: string = commander.args.join(" ");
 

@@ -22,8 +22,9 @@ export const createTemporaryDir = () => {
   });
 }
 
-export const readSyscallLogs = (): string => (
-  fs.readFileSync(`./${TEMP_DIR}/${SYSCALL_LOGS}`, { encoding: 'utf8', flag: 'r' }).toString()
+export const readSyscallLogs = (isContainer: boolean = false): string => (
+  fs.readFileSync(`./${isContainer ? "" : TEMP_DIR + '/'}${SYSCALL_LOGS}`,
+    { encoding: 'utf8', flag: 'r' }).toString()
 );
 
 export const readPackagesFile = (file: string): string => (
@@ -51,8 +52,8 @@ const writeDockerfileTemplate = (dockerfileName: string, content: string) => {
   }
 }
 
-export const writeDockerfile = (content: string) => (
-  writeDockerfileTemplate(DOCKERFILE_NAME, content)
+export const writeDockerfile = (content: string, isContainer: boolean = false) => (
+  writeDockerfileTemplate(`${DOCKERFILE_NAME}${isContainer ? ".hermit" : ""}`, content)
 )
 
 export const writeDockerfileStrace = (content: string) => (

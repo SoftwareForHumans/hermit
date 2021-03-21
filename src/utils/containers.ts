@@ -1,3 +1,4 @@
+import tar from 'tar-fs';
 import Docker from 'dockerode';
 
 import HermitOptions from './lib/HermitOptions';
@@ -6,8 +7,9 @@ import logger from './logger';
 const docker = new Docker();
 
 export const buildImage = (options: HermitOptions) => new Promise<string>((resolve, reject) => {
+  const tarDir = tar.pack(options.path);
 
-  docker.buildImage(options.path, { dockerfile: 'Dockerfile.strace' }, (error, stream) => {
+  docker.buildImage(tarDir, { dockerfile: 'Dockerfile.strace', q: true }, (error, stream) => {
     if (error) {
       reject(error);
     }
@@ -20,20 +22,24 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
       });
 
       stream.on('data', (dataBuffer: Buffer) => {
-        imageId += dataBuffer.toString();
+        const msg = JSON.parse(dataBuffer.toString())['stream'].replace("\n", "");
+        logger.info(`Docker Message - ${msg}`);
+
+        imageId = msg;
       });
 
       stream.on('end', () => {
         resolve(imageId.replace("\n", ""));
       });
     }
-
-    reject(Error('The build of the image failed'));
+    else {
+      reject(Error('Failed to stream from the docker socket'));
+    }
   });
 });
 
-export const createContainer = (imageId: string, _options: HermitOptions, _workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
-  docker.createContainer({ Image: imageId }, (error, container) => {
+export const createContainer = (imageId: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
+  docker.createContainer({ Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] } }, (error, container) => {
     if (error) {
       reject(error);
     }
@@ -47,6 +53,4 @@ export const createContainer = (imageId: string, _options: HermitOptions, _workd
   });
 });
 
-export const removeImage = (imageId: string) => new Promise((resolve, reject) => {
-  docker.getImage(imageId).remove();
-});
+export const removeImage = (imageId: string) => docker.getImage(imageId).remove({ force: true });

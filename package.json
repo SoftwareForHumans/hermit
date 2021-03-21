@@ -36,6 +36,7 @@
     "@types/chai": "^4.2.14",
     "@types/dockerode": "^3.2.2",
     "@types/mocha": "^8.0.4",
+    "@types/tar-fs": "^2.0.0",
     "@typescript-eslint/parser": "^4.11.0",
     "chai": "^4.2.0",
     "eslint": "^7.16.0",
@@ -50,6 +51,7 @@
     "commander": "^2.20.3",
     "dockerode": "^3.2.1",
     "figlet": "^1.5.0",
+    "tar-fs": "^2.0.1",
     "typescript": "^4.2.3",
     "winston": "^3.3.3"
   }

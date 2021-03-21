@@ -89,7 +89,7 @@ const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions)
   content += `CMD [${quotedArgs.toString()}]\n`;
 
   // Write Dockerfile
-  writeDockerfile(content);
+  writeDockerfile(content, options.container);
 
   // Write .dockerignore
   writeDockerignore(dockerfileData.filesIgnored.join('\n'));

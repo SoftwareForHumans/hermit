@@ -9,7 +9,6 @@ import languageModule from './modules/languages'
 
 import DockerfileData from './utils/lib/DockerfileData';
 import HermitOptions from './utils/lib/HermitOptions';
-import { filesIgnored } from './modules/languages/javascript';
 
 // Default Options
 export const defaultOptions: HermitOptions = {
@@ -34,7 +33,7 @@ export const dockerfileGeneration = async (command: string, suppliedOptions: any
 
   // Load module with strategies more appropriated to the detected Programming Language
   const languageData = await languageModule(inspectedData.language);
-  languageData.languageStaticInspection(inspectedData);
+  languageData.languageStaticInspection(inspectedData, options);
 
   // Modules to infer dockerfiles fields
   const imageData = imageModule(inspectedData, tracedData, languageData, options);

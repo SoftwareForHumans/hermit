@@ -19,14 +19,14 @@ const isBlacklisted = (program: string) => {
   return false;
 }
 
-const parseProcLogs = (): SystemInfo => {
+const parseProcLogs = (options: HermitOptions): SystemInfo => {
   const systemInfo: SystemInfo = {
     openat: new Array<Syscall>(),
     bind: new Array<Syscall>(),
     execve: new Array<Syscall>()
   }
 
-  const logs: string = readSyscallLogs();
+  const logs: string = readSyscallLogs(options.container);
   const pids: Array<number> = new Array<number>();
   const pidBlacklist: Array<number> = new Array<number>();
 
@@ -63,12 +63,14 @@ const parseProcLogs = (): SystemInfo => {
     }
   });
 
-  pids.forEach((pid) => {
-    try {
-      process.kill(pid);
-    }
-    catch (e) { }
-  });
+  if (!options.container) {
+    pids.forEach((pid) => {
+      try {
+        process.kill(pid);
+      }
+      catch (e) { }
+    });
+  }
 
   return systemInfo;
 }
@@ -91,7 +93,7 @@ const traceSystemCalls = (command: string, options: HermitOptions) => new Promis
       logger.info(`Process finished with code ${code}`);
     }
 
-    resolve(parseProcLogs());
+    resolve(parseProcLogs(options));
   });
 
   tracerProcess.on('error', (error) => {
@@ -110,7 +112,7 @@ const injectStraceContainer = (options: HermitOptions) => {
     let line = dockerfileLines[i];
 
     if (line.includes("WORKDIR")) {
-      workdir = line.replace("WORKDIR", "");
+      workdir = line.replace("WORKDIR", "").trim();
     }
 
     if (line.includes("CMD")) {
@@ -119,14 +121,14 @@ const injectStraceContainer = (options: HermitOptions) => {
       if (cmdRegex == null) throw new Error('Dockerfile has no enrypoint');
 
       const parsedCmd = JSON.parse(cmdRegex[0]);
-      const newEntrypoint = ['strace', `-o ${TEMP_DIR}/${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,open,openat']
+      const newEntrypoint = ['strace', '-o', `${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,open,openat']
         .concat(parsedCmd);
 
       dockerfileLines[cmdIndex] = `${line.replace(cmdRegex[0], "")}${JSON.stringify(newEntrypoint)}`;
     }
   };
 
-  dockerfileLines.splice(cmdIndex - 1, 0, "RUN apt install -y strace\nRUN mkdir tmp");
+  dockerfileLines.splice(cmdIndex, 0, "RUN apt install -y strace");
 
   writeDockerfileStrace(dockerfileLines.join('\n'));
 
@@ -134,24 +136,40 @@ const injectStraceContainer = (options: HermitOptions) => {
 }
 
 const traceContainerSyscalls = async (workdir: string, options: HermitOptions) => {
+  logger.info("Building image");
   const imageId = await buildImage(options);
 
-  const container = await createContainer(imageId);
+  logger.info(`Creating container from image with ID ${imageId}`);
+  const container = await createContainer(imageId, options, workdir);
 
-  container.start();
+  logger.info(`Starting container from image with ID ${imageId}`);
+  await container.start();
+
+  logger.info("Running service");
   await new Promise((resolve) => setTimeout(resolve, options.timeout * 1000));
-  container.remove();
 
-  removeImage(imageId);
+  logger.info("Stoping and removing container");
+  await container.remove({ force: true });
+
+  logger.info("Stoping and removing image");
+  try {
+    await removeImage(imageId);
+  }
+  catch { }
+
+  logger.info("Finished Docker Analysis");
+  return parseProcLogs(options);
 }
 
 const tracerModule = async (command: string, options: HermitOptions) => {
   if (options.container) {
     // TODO: docker run -v `pwd`:/<WORKDIR> $(docker build -q -f Dockerfile.strace .)
+    logger.info("Creating Dockerfile.strace");
     const workdir = injectStraceContainer(options);
-    await traceContainerSyscalls(workdir, options);
+    const syscalls: SystemInfo = await traceContainerSyscalls(workdir, options);
 
-    process.exit();
+    logger.info("Finished Tracing");
+    return syscalls;
   }
 
   const syscalls: SystemInfo = await traceSystemCalls(command, options);
