@@ -118,7 +118,7 @@ const injectStraceContainer = (options: HermitOptions) => {
     if (line.includes("CMD")) {
       cmdIndex = i;
       const cmdRegex = RegExp('\\[.*?\\]').exec(line);
-      if (cmdRegex == null) throw new Error('Dockerfile has no enrypoint');
+      if (cmdRegex == null) throw new Error('Dockerfile has no entrypoint');
 
       const parsedCmd = JSON.parse(cmdRegex[0]);
       const newEntrypoint = ['strace', '-o', `${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,open,openat']
