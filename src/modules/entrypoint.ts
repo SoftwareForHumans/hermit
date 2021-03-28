@@ -3,6 +3,17 @@ import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
 import HermitOptions from '../utils/lib/HermitOptions'
 
+const includesLanguageRuntime = (argsArray: Array<string>, languageRuntimes: Array<string>) => {
+  for (let index in languageRuntimes) {
+    if (argsArray.includes(languageRuntimes[index])) {
+      console.log("True");
+      return true;
+    }
+  }
+  console.log("False");
+  return false;
+}
+
 const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, options: HermitOptions): Array<string> => {
   let entrypointData: Array<string> = new Array<string>();
 
@@ -13,14 +24,14 @@ const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, lan
   }
 
   const syscalls: Array<Syscall> = tracedData.execve;
-  const languageRuntime: string = languageData.languageRuntime;
+  const languageRuntime: Array<string> = languageData.languageRuntime;
   const currentPath: string = options.path;
 
   syscalls.forEach((call) => {
     const argsArray: Array<any> = call.args[1];
     const result: any = call.result;
 
-    if (result == 0 && argsArray.includes(languageRuntime)) {
+    if (result == 0 && includesLanguageRuntime(argsArray, languageRuntime)) {
       // The non-minimalist images require the exectuble to the entrypoint
       if (options.multiStage) {
         argsArray.shift();

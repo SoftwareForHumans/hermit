@@ -16,7 +16,7 @@ export const languageEnvVars = [
   `PYTHONPATH=./${LOCAL_SITE_PACKAGES}`
 ];
 
-export const languageRuntime = "python3";
+export const languageRuntime = ["python", "python3"];
 
 export const PACKAGES_LIST: string = 'pythonpackages.txt';
 
