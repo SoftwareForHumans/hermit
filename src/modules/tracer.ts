@@ -105,17 +105,22 @@ const injectStraceContainer = (options: HermitOptions) => {
   const dockerfilePath = path.join(options.path, 'Dockerfile');
   const dockerfileLines = readDockerfile(dockerfilePath);
 
+  let image: string = "";
   let workdir: string = "";
   let cmdIndex: number = -1;
 
   for (let i = 0; i < dockerfileLines.length; i++) {
     let line = dockerfileLines[i];
 
+    if (line.includes("FROM")) {
+      image = line.replace("FROM", "").trim();
+    }
+
     if (line.includes("WORKDIR")) {
       workdir = line.replace("WORKDIR", "").trim();
     }
 
-    if (line.includes("CMD")) {
+    if (line.includes("CMD") || line.includes("ENTRYPOINT")) {
       cmdIndex = i;
       const cmdRegex = RegExp('\\[.*?\\]').exec(line);
       if (cmdRegex == null) throw new Error('Dockerfile has no entrypoint');
@@ -128,19 +133,21 @@ const injectStraceContainer = (options: HermitOptions) => {
     }
   };
 
-  dockerfileLines.splice(cmdIndex, 0, "RUN apt install -y strace");
+  const installCmd: string = `RUN ${image.includes("alpine") ? "apk add --no-cache" : "apt install -y"} strace`;
+
+  dockerfileLines.splice(cmdIndex - 1, 0, installCmd);
 
   writeDockerfileStrace(dockerfileLines.join('\n'));
 
   return workdir;
 }
 
-const traceContainerSyscalls = async (workdir: string, options: HermitOptions) => {
+const traceContainerSyscalls = async (workdir: string, cmd: string, options: HermitOptions) => {
   logger.info("Building image");
   const imageId = await buildImage(options);
 
   logger.info(`Creating container from image with ID ${imageId}`);
-  const container = await createContainer(imageId, options, workdir);
+  const container = await createContainer(imageId, cmd, options, workdir);
 
   logger.info(`Starting container from image with ID ${imageId}`);
   await container.start();
@@ -166,7 +173,7 @@ const tracerModule = async (command: string, options: HermitOptions) => {
     // TODO: docker run -v `pwd`:/<WORKDIR> $(docker build -q -f Dockerfile.strace .)
     logger.info("Creating Dockerfile.strace");
     const workdir = injectStraceContainer(options);
-    const syscalls: SystemInfo = await traceContainerSyscalls(workdir, options);
+    const syscalls: SystemInfo = await traceContainerSyscalls(workdir, command, options);
 
     logger.info("Finished Tracing");
     return syscalls;

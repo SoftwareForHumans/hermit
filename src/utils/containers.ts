@@ -38,19 +38,21 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
   });
 });
 
-export const createContainer = (imageId: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
-  docker.createContainer({ Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] } }, (error, container) => {
-    if (error) {
-      reject(error);
-    }
+export const createContainer = (imageId: string, cmd: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
+  docker.createContainer(
+    { Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] }, Cmd: cmd.split(" ") },
+    (error, container) => {
+      if (error) {
+        reject(error);
+      }
 
-    if (container) {
-      resolve(container);
+      if (container) {
+        resolve(container);
 
-    }
+      }
 
-    reject('The creation of the container failed');
-  });
+      reject('The creation of the container failed');
+    });
 });
 
 export const removeImage = (imageId: string) => docker.getImage(imageId).remove({ force: true });
