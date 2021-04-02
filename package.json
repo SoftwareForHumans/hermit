@@ -9,7 +9,7 @@
   "scripts": {
     "start": "ts-node src/bin/cli.ts",
     "build": "tsc && npm run copy-files",
-    "install-hermit": "npm run build && npm link && npm run setup-hermit",
+    "install-hermit": "npm run build && npm run setup-hermit",
     "copy-files": "cp -r ./src/utils/res ./dist/utils/",
     "setup-hermit": "sed -i '1i#!/usr/bin/env node' dist/bin/cli.js && chmod +x dist/bin/cli.js",
     "hermit": "node dist/bin/cli.js",
