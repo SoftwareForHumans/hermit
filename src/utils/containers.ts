@@ -50,8 +50,9 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
 });
 
 export const createContainer = (imageId: string, cmd: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
+  console.log(cmd);
   docker.createContainer(
-    { Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] }, Cmd: cmd.split(" ") },
+    { Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] }, Cmd: (cmd == "") ? undefined : cmd.split(" ") },
     (error, container) => {
       if (error) {
         reject(error);

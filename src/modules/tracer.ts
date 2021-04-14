@@ -123,13 +123,14 @@ const injectStraceContainer = (options: HermitOptions) => {
     if (line.includes("CMD") || line.includes("ENTRYPOINT")) {
       cmdIndex = i;
       const cmdRegex = RegExp('\\[.*?\\]').exec(line);
-      if (cmdRegex == null) throw new Error('Dockerfile has no entrypoint');
+      const lineWords = line.split(" ");
+      //if (cmdRegex == null) throw new Error('Dockerfile has no entrypoint');
 
-      const parsedCmd = JSON.parse(cmdRegex[0]);
+      const parsedCmd = (cmdRegex == null) ? lineWords.slice(1) : JSON.parse(cmdRegex[0]);
       const newEntrypoint = ['strace', '-o', `${SYSCALL_LOGS}`, '-v', '-s 200', '-f', '-e', 'trace=execve,network,open,openat']
         .concat(parsedCmd);
 
-      dockerfileLines[cmdIndex] = `${line.replace(cmdRegex[0], "")}${JSON.stringify(newEntrypoint)}`;
+      dockerfileLines[cmdIndex] = `${lineWords[0]} ${JSON.stringify(newEntrypoint)}`;
     }
 
     if (line.includes("USER")) {
@@ -137,7 +138,9 @@ const injectStraceContainer = (options: HermitOptions) => {
     }
   };
 
-  const installCmd: string = `RUN ${image.includes("alpine") ? "apk add --no-cache" : "apt install -y"} strace`;
+  const installCmd: string = `RUN ${image.includes("alpine") ?
+    "apk update && apk add --no-cache" :
+    "apt update && apt install -y"} strace`;
 
   dockerfileLines.splice(cmdIndex - 1, 0, installCmd);
 
@@ -174,7 +177,6 @@ const traceContainerSyscalls = async (workdir: string, cmd: string, options: Her
 
 const tracerModule = async (command: string, options: HermitOptions) => {
   if (options.container) {
-    // TODO: docker run -v `pwd`:/<WORKDIR> $(docker build -q -f Dockerfile.strace .)
     logger.info("Creating Dockerfile.strace");
     const workdir = injectStraceContainer(options);
     const syscalls: SystemInfo = await traceContainerSyscalls(workdir, command, options);
