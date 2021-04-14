@@ -6,11 +6,10 @@ import HermitOptions from '../utils/lib/HermitOptions'
 const includesLanguageRuntime = (argsArray: Array<string>, languageRuntimes: Array<string>) => {
   for (let index in languageRuntimes) {
     if (argsArray.includes(languageRuntimes[index])) {
-      console.log("True");
       return true;
     }
   }
-  console.log("False");
+
   return false;
 }
 

@@ -131,6 +131,10 @@ const injectStraceContainer = (options: HermitOptions) => {
 
       dockerfileLines[cmdIndex] = `${line.replace(cmdRegex[0], "")}${JSON.stringify(newEntrypoint)}`;
     }
+
+    if (line.includes("USER")) {
+      dockerfileLines[i] = `#${dockerfileLines[i]}`;
+    }
   };
 
   const installCmd: string = `RUN ${image.includes("alpine") ? "apk add --no-cache" : "apt install -y"} strace`;
