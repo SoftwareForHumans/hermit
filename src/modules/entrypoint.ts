@@ -50,6 +50,10 @@ const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, lan
     }
   });
 
+  if (entrypointData.length === 0) {
+    return syscalls[0].args[1];
+  }
+
   return entrypointData;
 }
 
