@@ -27,8 +27,6 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
       });
 
       stream.on('data', (dataBuffer: Buffer) => {
-        console.log(dataBuffer.toString());
-
         try {
           const msg = JSON.parse(dataBuffer.toString())['stream'].replace("\n", "");
           logger.info(`Docker Message - ${msg}`);
@@ -51,7 +49,6 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
 });
 
 export const createContainer = (imageId: string, cmd: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
-  console.log(cmd);
   docker.createContainer(
     {
       Image: imageId,
