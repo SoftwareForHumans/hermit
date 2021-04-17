@@ -2,6 +2,7 @@ import tar from 'tar-fs';
 import Docker from 'dockerode';
 
 import HermitOptions from './lib/HermitOptions';
+import Syscall from './lib/Syscall';
 import logger from './logger';
 
 const docker = new Docker();
@@ -13,7 +14,7 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
 
   const tarDir = tar.pack(options.path);
 
-  docker.buildImage(tarDir, { t: imageTag, dockerfile: 'Dockerfile.strace', q: true }, (error, stream) => {
+  docker.buildImage(tarDir, { t: imageTag, dockerfile: 'Dockerfile.strace', q: true, forcerm: true }, (error, stream) => {
     if (error) {
       reject(error);
     }
@@ -52,7 +53,11 @@ export const buildImage = (options: HermitOptions) => new Promise<string>((resol
 export const createContainer = (imageId: string, cmd: string, options: HermitOptions, workdir: string) => new Promise<Docker.Container>((resolve, reject) => {
   console.log(cmd);
   docker.createContainer(
-    { Image: imageId, HostConfig: { Binds: [`${options.path}:${workdir}`] }, Cmd: (cmd == "") ? undefined : cmd.split(" ") },
+    {
+      Image: imageId,
+      HostConfig: { Binds: [`${options.path}:${workdir}`] },
+      Cmd: (cmd == "") ? undefined : cmd.split(" ")
+    },
     (error, container) => {
       if (error) {
         reject(error);
@@ -68,3 +73,23 @@ export const createContainer = (imageId: string, cmd: string, options: HermitOpt
 });
 
 export const removeImage = (imageId: string) => docker.getImage(imageId).remove({ force: true });
+
+export const extractPorts = async (container: Docker.Container) => {
+  const inspectedData = await container.inspect();
+
+  return Object.keys(inspectedData.NetworkSettings.Ports).map((port: string) => {
+    return <Syscall>{
+      syscall: 'bind',
+      args: [
+        18,
+        { sa_family: null, sin6_port: { params: [port.split('/')[0]] }, sin_addr: null },
+        16
+      ],
+      result: 0,
+      timing: 0,
+      pid: 21,
+      type: 'SYSCALL'
+    }
+
+  });
+}

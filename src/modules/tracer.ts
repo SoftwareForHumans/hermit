@@ -1,6 +1,6 @@
 import { ChildProcess, exec } from 'child_process';
 import path from 'path'
-import { buildImage, createContainer, removeImage } from '../utils/containers';
+import { buildImage, createContainer, removeImage, extractPorts } from '../utils/containers';
 
 import { TEMP_DIR, SYSCALL_LOGS, readSyscallLogs, createTemporaryDir, readDockerfile, writeDockerfileStrace } from '../utils/fileSystem';
 import { parseLine } from '../utils/parser';
@@ -51,7 +51,13 @@ const parseProcLogs = (options: HermitOptions): SystemInfo => {
         systemInfo.bind.push(syscall);
         break;
       case 'execve':
-        if (isBlacklisted(syscall.args[0])) {
+        if (syscall.result != 0) return;
+
+        const programName = syscall.args[0];
+
+        if (programName == undefined || Number.isInteger(programName)) return;
+
+        if (isBlacklisted(programName)) {
           pidBlacklist.push(syscall.pid);
           return;
         }
@@ -105,6 +111,8 @@ const injectStraceContainer = (options: HermitOptions) => {
   const dockerfilePath = path.join(options.path, 'Dockerfile');
   const dockerfileLines = readDockerfile(dockerfilePath);
 
+  const ports: Array<string> = new Array<string>();
+
   let image: string = "";
   let workdir: string = "";
   let cmdIndex: number = -1;
@@ -118,6 +126,10 @@ const injectStraceContainer = (options: HermitOptions) => {
 
     if (line.includes("WORKDIR")) {
       workdir = line.replace("WORKDIR", "").trim();
+    }
+
+    if (line.includes("EXPOSE")) {
+      ports.concat(line.replace("EXPOSE", "").trim().split(" "));
     }
 
     if (line.includes("CMD") || line.includes("ENTRYPOINT")) {
@@ -159,6 +171,9 @@ const traceContainerSyscalls = async (workdir: string, cmd: string, options: Her
   logger.info(`Starting container from image with ID ${imageId}`);
   await container.start();
 
+  // Extract Container Ports
+  const ports = await extractPorts(container);
+
   logger.info("Running service");
   await new Promise((resolve) => setTimeout(resolve, options.timeout * 1000));
 
@@ -172,7 +187,10 @@ const traceContainerSyscalls = async (workdir: string, cmd: string, options: Her
   catch { }
 
   logger.info("Finished Docker Analysis");
-  return parseProcLogs(options);
+  const sysInfo = parseProcLogs(options);
+  sysInfo.bind = sysInfo.bind.concat(ports);
+
+  return sysInfo;
 }
 
 const tracerModule = async (command: string, options: HermitOptions) => {
