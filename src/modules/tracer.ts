@@ -117,12 +117,14 @@ const injectStraceContainer = (options: HermitOptions) => {
   let workdir: string = "";
   let workdirIndex: number = -1;
   let cmdIndex: number = -1;
+  let fromIndex: number = -1;
 
   for (let i = 0; i < dockerfileLines.length; i++) {
     let line = dockerfileLines[i];
 
     if (line.includes("FROM")) {
       image = line.replace("FROM", "").trim();
+      fromIndex = i;
     }
 
     if (line.includes("WORKDIR")) {
@@ -152,16 +154,20 @@ const injectStraceContainer = (options: HermitOptions) => {
     }
   };
 
-  if (workdir == '/') {
-    workdir = "/strace-app";
-    dockerfileLines[workdirIndex] = `WORKDIR ${workdir}`;
-  }
-
   const installCmd: string = `RUN ${image.includes("alpine") ?
     "apk update && apk add --no-cache" :
     "apt update && apt install -y"} strace`;
 
   dockerfileLines.splice(cmdIndex - 1, 0, installCmd);
+
+  if (workdir == '/') {
+    workdir = "/strace-app";
+    dockerfileLines[workdirIndex] = `WORKDIR ${workdir}`;
+  }
+  else if (workdir == "") {
+    workdir = "/strace-app";
+    dockerfileLines.splice(fromIndex + 1, 0, `WORKDIR ${workdir}`);
+  }
 
   writeDockerfileStrace(dockerfileLines.join('\n'));
 
