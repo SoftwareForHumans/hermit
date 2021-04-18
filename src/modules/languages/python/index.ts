@@ -35,5 +35,5 @@ export const languageStaticInspection = (info: SourceInfo) => {
     `${dep}${lockData.default[dep].version}`
   ));
 
-  writeFile('requiments.txt', requirementsData.join("\n") + '\n');
+  writeFile('requirements.txt', requirementsData.join("\n") + '\n');
 };
