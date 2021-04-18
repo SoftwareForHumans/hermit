@@ -25,21 +25,23 @@ const detectLanguage = (info: any) => {
   if ((info.langs.html || 0) > 0) info.web = true;
 
   const keys = Object.keys(info.langs);
-
-  let maxKey = keys[0];
-  let max = info.langs[maxKey];
-
-  for (let i = 1; i < keys.length; i++) {
-    const key = keys[i];
-    const value = info.langs[key];
-
-    if (value > max) {
-      max = value;
-      maxKey = key;
+  keys.sort((a: string, b: string) => {
+    if (info.langs[a] < info.langs[b]) {
+      return 1;
     }
+    else if (info.langs[a] > info.langs[b]) {
+      return -1;
+    }
+    return 0;
+  });
+
+  let languageIndex = 0;
+
+  while (['html', 'css'].includes(keys[languageIndex])) {
+    languageIndex++;
   }
 
-  info.language = maxKey;
+  info.language = keys[languageIndex];
 }
 
 const inspectorModule = async () => {
