@@ -8,7 +8,7 @@ export const languageImages = [
 ];
 
 export const languageDependenciesInstallation = [
-  "npm ci --only=production"
+  "npm install --only=production"
 ];
 
 export const languageEnvVars = [];
