@@ -115,6 +115,7 @@ const injectStraceContainer = (options: HermitOptions) => {
 
   let image: string = "";
   let workdir: string = "";
+  let workdirIndex: number = -1;
   let cmdIndex: number = -1;
 
   for (let i = 0; i < dockerfileLines.length; i++) {
@@ -126,6 +127,7 @@ const injectStraceContainer = (options: HermitOptions) => {
 
     if (line.includes("WORKDIR")) {
       workdir = line.replace("WORKDIR", "").trim();
+      workdirIndex = i;
     }
 
     if (line.includes("EXPOSE")) {
@@ -149,6 +151,11 @@ const injectStraceContainer = (options: HermitOptions) => {
       dockerfileLines[i] = `#${dockerfileLines[i]}`;
     }
   };
+
+  if (workdir == '/') {
+    workdir = "/strace-app";
+    dockerfileLines[workdirIndex] = `WORKDIR ${workdir}`;
+  }
 
   const installCmd: string = `RUN ${image.includes("alpine") ?
     "apk update && apk add --no-cache" :
