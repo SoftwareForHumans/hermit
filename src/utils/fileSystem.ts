@@ -6,8 +6,8 @@ export const SYSCALL_LOGS: string = 'syscall.log';
 export const DOCKERFILE_NAME: string = "Dockerfile";
 export const DOCKERFILE_STRACE_NAME: string = "Dockerfile.strace";
 export const DOCKERIGNORE_NAME: string = ".dockerignore";
-
 export const DEBIAN_PACKAGES_LIST: string = 'allpackages.txt';
+export const PIPFILE_LOCK_NAME: string = 'Pipfile.lock';
 
 export const createTemporaryDir = () => {
   const dir_path: string = path.join('./', TEMP_DIR);
@@ -43,21 +43,21 @@ export const readDockerfile = (dockerfilePath: string) => (
   fs.readFileSync(dockerfilePath, { encoding: 'utf8', flag: 'r' }).toString().split('\n')
 );
 
-const writeDockerfileTemplate = (dockerfileName: string, content: string) => {
+export const writeFile = (fileName: string, content: string) => {
   try {
-    fs.writeFileSync(dockerfileName, content);
+    fs.writeFileSync(fileName, content);
   }
   catch (e) {
-    console.log('Dockerfile created successfully!');
+    console.log(`${fileName} created successfully!`);
   }
 }
 
 export const writeDockerfile = (content: string, isContainer: boolean = false) => (
-  writeDockerfileTemplate(`${DOCKERFILE_NAME}${isContainer ? ".hermit" : ""}`, content)
+  writeFile(`${DOCKERFILE_NAME}${isContainer ? ".hermit" : ""}`, content)
 )
 
 export const writeDockerfileStrace = (content: string) => (
-  writeDockerfileTemplate(DOCKERFILE_STRACE_NAME, content)
+  writeFile(DOCKERFILE_STRACE_NAME, content)
 )
 
 export const writeDockerignore = (content: string) => {
@@ -67,4 +67,15 @@ export const writeDockerignore = (content: string) => {
       return
     }
   })
+}
+
+export const readPipfile = () => {
+  if (fs.existsSync(PIPFILE_LOCK_NAME)) {
+    return JSON.parse(
+      fs.readFileSync(PIPFILE_LOCK_NAME, { encoding: 'utf8', flag: 'r' }).toString()
+    );
+  }
+  else {
+    return null;
+  }
 }
