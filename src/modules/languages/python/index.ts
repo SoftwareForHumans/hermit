@@ -1,5 +1,4 @@
 import SourceInfo from '../../../utils/lib/SourceInfo';
-import { readPipfile, writeFile } from '../../../utils/fileSystem';
 
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
@@ -25,15 +24,4 @@ export const filesIgnored = [
   "__pycache__"
 ];
 
-export const languageStaticInspection = (info: SourceInfo) => {
-  const lockData = readPipfile();
-
-  if (lockData == null) return;
-
-  const packagesList = Object.keys(lockData.default);
-  const requirementsData = packagesList.map((dep: string) => (
-    `${dep}${lockData.default[dep].version}`
-  ));
-
-  writeFile('requirements.txt', requirementsData.join("\n") + '\n');
-};
+export const languageStaticInspection = (info: SourceInfo) => { };
