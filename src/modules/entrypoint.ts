@@ -3,6 +3,8 @@ import SystemInfo from '../utils/lib/SystemInfo';
 import Syscall from '../utils/lib/Syscall';
 import HermitOptions from '../utils/lib/HermitOptions'
 
+const EXECUTABLES_EXTENSIONS = ['sh'];
+
 const includesLanguageRuntime = (argsArray: Array<string>, languageRuntimes: Array<string>) => {
   for (let index in languageRuntimes) {
     if (argsArray.includes(languageRuntimes[index])) {
@@ -25,6 +27,11 @@ const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, lan
   const syscalls: Array<Syscall> = tracedData.execve;
   const languageRuntime: Array<string> = languageData.languageRuntime;
   const currentPath: string = options.path;
+  const firstExec = syscalls[0].args[1];
+
+  if (EXECUTABLES_EXTENSIONS.includes(firstExec[0].split('.')[1])) {
+    return firstExec;
+  }
 
   syscalls.forEach((call) => {
     const argsArray: Array<any> = call.args[1];
@@ -51,7 +58,7 @@ const entrypointModule = (inspectedData: SourceInfo, tracedData: SystemInfo, lan
   });
 
   if (entrypointData.length === 0) {
-    return syscalls[0].args[1];
+    return firstExec;
   }
 
   return entrypointData;
