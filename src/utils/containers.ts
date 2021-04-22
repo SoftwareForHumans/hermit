@@ -4,6 +4,7 @@ import Docker from 'dockerode';
 import HermitOptions from './lib/HermitOptions';
 import Syscall from './lib/Syscall';
 import logger from './logger';
+import { getNodeMajorVersion } from 'typescript';
 
 const docker = new Docker();
 
@@ -90,3 +91,6 @@ export const extractPorts = async (container: Docker.Container) => {
 
   });
 }
+
+// TODO: Discover container OS
+// export const extractOS = async (imageId: string) => {}

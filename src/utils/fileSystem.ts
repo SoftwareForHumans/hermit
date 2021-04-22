@@ -68,3 +68,7 @@ export const writeDockerignore = (content: string) => {
     }
   })
 }
+
+export const existsPipfile = () => (
+  fs.existsSync(PIPFILE_LOCK_NAME)
+);

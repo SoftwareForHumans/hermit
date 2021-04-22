@@ -198,6 +198,7 @@ const traceContainerSyscalls = async (workdir: string, cmd: string, options: Her
     await removeImage(imageId);
   }
   catch { }
+  process.exit();
 
   logger.info("Finished Docker Analysis");
   const sysInfo = parseProcLogs(options);
