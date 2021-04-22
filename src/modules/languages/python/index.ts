@@ -30,7 +30,7 @@ export const languageStaticInspection = (info: SourceInfo) => {
 
   languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
 
-  const pipfileContent = readPipfile();
-  const pythonVersion = pipfileContent.match(/python_version = "(.*?)"/);
-  languageImages[0] = `python:${pythonVersion}-slim`;
+  const pipfileContent: string = readPipfile();
+  const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
+  languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[0]}-slim`;
 };
