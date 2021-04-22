@@ -32,5 +32,5 @@ export const languageStaticInspection = (info: SourceInfo) => {
 
   const pipfileContent: string = readPipfile();
   const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
-  languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[0]}-slim`;
+  languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
 };

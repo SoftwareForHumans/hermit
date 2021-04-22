@@ -23,7 +23,7 @@ export const parseLine = (line: string): Syscall | null => {
         return null;
     }
 
-    logger.warn(e);
+    logger.warn(`Failed to Parse Syscall: ${line}`);
 
     return null;
   }
