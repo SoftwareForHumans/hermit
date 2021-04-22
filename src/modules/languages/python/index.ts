@@ -1,5 +1,5 @@
 import SourceInfo from '../../../utils/lib/SourceInfo';
-import { existsPipfile } from '../../../utils/fileSystem';
+import { existsPipfile, readPipfile } from '../../../utils/fileSystem';
 
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
@@ -26,7 +26,11 @@ export const filesIgnored = [
 ];
 
 export const languageStaticInspection = (info: SourceInfo) => {
-  if (existsPipfile()) {
-    languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
-  }
+  if (!existsPipfile()) return;
+
+  languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
+
+  const pipfileContent = readPipfile();
+  const pythonVersion = pipfileContent.match(/python_version = "(.*?)"/);
+  languageImages[0] = `python:${pythonVersion}-slim`;
 };

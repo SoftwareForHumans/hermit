@@ -72,3 +72,9 @@ export const writeDockerignore = (content: string) => {
 export const existsPipfile = () => (
   fs.existsSync(PIPFILE_LOCK_NAME)
 );
+
+export const readPipfile = () => (
+  JSON.parse(
+    fs.readFileSync(PIPFILE_LOCK_NAME, { encoding: 'utf8', flag: 'r' }).toString()
+  )
+)
