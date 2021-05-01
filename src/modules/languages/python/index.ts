@@ -38,6 +38,6 @@ export const languageStaticInspection = (info: SourceInfo) => {
     const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
     languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
 
-    languagePackages.push('gcc');
+    languagePackages.concat(['python-dev', 'build-essential', 'pkg-config']);
   }
 };
