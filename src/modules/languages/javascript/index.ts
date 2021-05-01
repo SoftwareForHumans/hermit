@@ -21,6 +21,8 @@ export const filesIgnored = [
   "node_modules"
 ];
 
+export const languagePackages: Array<string> = [];
+
 export const languageStaticInspection = (info: SourceInfo, options: HermitOptions) => {
   const path = options.path;
 

@@ -1,5 +1,5 @@
 import SourceInfo from '../../../utils/lib/SourceInfo';
-import { existsPipfile, readPipfile } from '../../../utils/fileSystem';
+import { existsRequirements, existsPipfile, readPipfile } from '../../../utils/fileSystem';
 
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
@@ -25,12 +25,19 @@ export const filesIgnored = [
   "__pycache__"
 ];
 
+export const languagePackages: Array<string> = [];
+
 export const languageStaticInspection = (info: SourceInfo) => {
-  if (!existsPipfile()) return;
+  if (existsRequirements()) {
+    languagePackages.concat(['python-dev', 'build-essential', 'pkg-config']);
+  }
+  else if (existsPipfile()) {
+    languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
 
-  languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
+    const pipfileContent: string = readPipfile();
+    const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
+    languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
 
-  const pipfileContent: string = readPipfile();
-  const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
-  languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
+    languagePackages.push('gcc');
+  }
 };

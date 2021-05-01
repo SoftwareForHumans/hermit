@@ -8,6 +8,7 @@ export const DOCKERFILE_STRACE_NAME: string = "Dockerfile.strace";
 export const DOCKERIGNORE_NAME: string = ".dockerignore";
 export const DEBIAN_PACKAGES_LIST: string = 'allpackages.txt';
 export const PIPFILE_NAME: string = 'Pipfile';
+export const REQUIREMENTS_NAME: string = 'requirements.txt';
 
 export const createTemporaryDir = () => {
   const dir_path: string = path.join('./', TEMP_DIR);
@@ -71,6 +72,10 @@ export const writeDockerignore = (content: string) => {
 
 export const existsPipfile = () => (
   fs.existsSync(PIPFILE_NAME)
+);
+
+export const existsRequirements = () => (
+  fs.existsSync(REQUIREMENTS_NAME)
 );
 
 export const readPipfile = () => (

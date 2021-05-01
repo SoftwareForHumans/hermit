@@ -32,6 +32,8 @@ const isLibrary = (fileName: string) => {
 }
 
 const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any): DependenciesData => {
+  const { languagePackages } = languageData;
+
   const installablePackages: Array<string> = new Array<string>();
   const filteredPackages: Array<string> = new Array<string>();
   const librariesPath: Array<string> = new Array<string>();
@@ -63,7 +65,7 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   });
 
   return {
-    packages: filteredPackages,
+    packages: filteredPackages.concat(languagePackages),
     libraries: librariesPath
   };
 }
