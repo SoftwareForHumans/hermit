@@ -136,7 +136,7 @@ const injectStraceContainer = (options: HermitOptions) => {
       ports.concat(line.replace("EXPOSE", "").trim().split(" "));
     }
 
-    if (line.includes("CMD") || line.includes("ENTRYPOINT")) {
+    if ((line.includes("CMD") || line.includes("ENTRYPOINT")) && (cmdIndex == -1)) {
       cmdIndex = i;
       const cmdRegex = RegExp('\\[.*?\\]').exec(line);
       const lineWords = line.split(" ");
