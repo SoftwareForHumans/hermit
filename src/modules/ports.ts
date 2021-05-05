@@ -13,7 +13,7 @@ const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _langua
     if (portData != undefined) {
       const port: number = portData.params[0];
 
-      if (portsData.includes(port)) return;
+      if (portsData.includes(port) || port == 0) return;
 
       portsData.push(port);
     }
