@@ -28,9 +28,7 @@ export const filesIgnored = [
 export const languagePackages: Array<string> = [];
 
 export const languageStaticInspection = (info: SourceInfo) => {
-  console.log("Entered");
   if (existsRequirements()) {
-    console.log("Success");
     languagePackages.push(...['python-dev', 'build-essential', 'pkg-config']);
   }
   else if (existsPipfile()) {
