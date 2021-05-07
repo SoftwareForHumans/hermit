@@ -11,7 +11,7 @@ const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _langua
     const portData = call.args[1]['sin6_port'];
 
     if (portData != undefined) {
-      const port: number = portData.params[0];
+      const port: number = Number.isInteger(portData.params[0]) ? portData.params[0] : parseInt(portData.params[0]);
 
       if (portsData.includes(port) || port == 0) return;
 
@@ -21,7 +21,7 @@ const portsModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, _langua
       const portData = call.args[1]['sin_port'];
 
       if (portData != undefined) {
-        const port: number = portData.params[0];
+        const port: number = Number.isInteger(portData.params[0]) ? portData.params[0] : parseInt(portData.params[0]);
 
         if (portsData.includes(port) || port == 0) return;
 

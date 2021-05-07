@@ -62,6 +62,8 @@ export const writeDockerfileStrace = (content: string) => (
 )
 
 export const writeDockerignore = (content: string) => {
+  if (fs.existsSync(DOCKERIGNORE_NAME)) return;
+
   fs.writeFile(DOCKERIGNORE_NAME, content, (err) => {
     if (err) {
       console.error(err)

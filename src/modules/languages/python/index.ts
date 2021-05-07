@@ -28,8 +28,10 @@ export const filesIgnored = [
 export const languagePackages: Array<string> = [];
 
 export const languageStaticInspection = (info: SourceInfo) => {
+  console.log("Entered");
   if (existsRequirements()) {
-    languagePackages.concat(['python-dev', 'build-essential', 'pkg-config']);
+    console.log("Success");
+    languagePackages.push(...['python-dev', 'build-essential', 'pkg-config']);
   }
   else if (existsPipfile()) {
     languageDependenciesInstallation.unshift("pip install pipenv && pipenv lock -r > requirements.txt");
@@ -38,6 +40,6 @@ export const languageStaticInspection = (info: SourceInfo) => {
     const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
     languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
 
-    languagePackages.concat(['python-dev', 'build-essential', 'pkg-config']);
+    languagePackages.push(...['python-dev', 'build-essential', 'pkg-config']);
   }
 };
