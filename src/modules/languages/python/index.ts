@@ -27,7 +27,7 @@ export const filesIgnored = [
 
 export const languagePackages: Array<string> = [];
 
-const buildPackages = ['python3-dev', 'build-essential', 'pkg-config'];
+const buildPackages = ['python3-dev', 'build-essential', 'pkg-config', 'cmake'];
 
 export const languageStaticInspection = (info: SourceInfo) => {
   if (existsRequirements()) {
