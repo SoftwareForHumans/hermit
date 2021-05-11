@@ -28,6 +28,9 @@ const getPackageName = (library: string) => {
 }
 
 const isLibrary = (fileName: string) => {
+  if ((typeof fileName) !== "string") {
+    return false;
+  }
   return fileName.split('.').includes('so') && !fileName.includes('python');
 }
 
