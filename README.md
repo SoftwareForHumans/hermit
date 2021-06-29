@@ -13,6 +13,23 @@ Run in the root of the project:
 npm install
 ```
 
+## Install hermit in the system
+Run in the root of the project:
+```bash
+npm run install-hermit
+```
+
+## How to run hermit
+It is required first to have installed with the previous command. `hermit` can be run in any directory.
+
+Run (in any directory):
+```bash
+hermit [OPTIONS] <service_command>
+```
+
+The directory `tmp/` will be generated in the current directory, where `hermit` is being executed.
+
+
 ## How to run (from the root of the source code)
 Run in the root of the project:
 ```bash
@@ -43,23 +60,6 @@ node /path/to/root/dist/bin/cli.js [OPTIONS] <service_command>
 
 This time the directory `tmp/` will be generated in the current directory, where the tool is being executed.
 
-## Install hermit globally
-Run in the root of the project:
-```bash
-npm run install-hermit
-```
-
-## How to run hermit
-It is required first to have installed with the previous command. `hermit` can be run in any directory.
-
-Run (in any directory):
-```bash
-hermit [OPTIONS] <service_command>
-```
-
-The directory `tmp/` will be generated in the current directory, where `hermit` is being executed.
-
 ## Current Limitations
   * At the moment, only works in debian-based linux distributions like Ubuntu or Debian itself.
   * Users must supply to hermit the command to run the service.
-  * In the case of a statically complied languages, it is also mandatory the supply of the command to to build the service. (NOT IMPLEMENTED YET)
