@@ -11,26 +11,30 @@ import logger from "../utils/logger";
 import { runCommandInContainer } from "../utils/containers";
 
 const getPackageName = async (library: string) => {
-  try {
-    const packageName: string = (
-      await runCommandInContainer("debian:stable-slim", `dpkg -S ${library}`)
-    ).split(":")[0];
+  const imageName = "debian:stable-slim";
 
-    console.log(packageName);
-    
+  try {
+    const output: string = await runCommandInContainer(
+      imageName,
+      `dpkg -S ${library}`
+    );
+
+    if (output.includes("no path found")) return null;
+
+    const packageName = output.split(":")[0];
+
     return packageName;
   } catch (e) {}
 
   try {
-    const packageName: string = (
-      await runCommandInContainer(
-        "debian:stable-slim",
-        `dpkg -S "$(readlink -f ${library})"`
-      )
-    ).split(":")[0];
+    const output: string = await runCommandInContainer(
+      imageName,
+      `dpkg -S "$(readlink -f ${library})"`
+    );
 
-    console.log(packageName);
+    if (output.includes("no path found")) return null;
 
+    const packageName = output.split(":")[0];
 
     return packageName;
   } catch (e2) {}
