@@ -9,7 +9,7 @@ import { getNodeMajorVersion } from "typescript";
 
 const docker = new Docker();
 
-export const runCommandInImage = async (
+export const runCommandInContainer = async (
   image: string,
   command: string
 ): Promise<string> => {
