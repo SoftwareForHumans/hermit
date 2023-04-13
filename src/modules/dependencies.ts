@@ -8,22 +8,29 @@ import HermitOptions from "../utils/lib/HermitOptions";
 
 import { readDebianPackages, readLanguagePackages } from "../utils/fileSystem";
 import logger from "../utils/logger";
+import { runCommandInContainer } from "../utils/containers";
 
-const getPackageName = (library: string) => {
+const getPackageName = async (library: string) => {
   try {
-    const packageName: string = execSync(`dpkg -S ${library}`, {
-      stdio: "pipe",
-      encoding: "utf-8",
-    }).split(":")[0];
+    const packageName: string = (
+      await runCommandInContainer("debian:stable-slim", `dpkg -S ${library}`)
+    ).split(":")[0];
 
+    console.log(packageName);
+    
     return packageName;
   } catch (e) {}
 
   try {
-    const packageName: string = execSync(
-      `dpkg -S "$(readlink -f ${library})"`,
-      { stdio: "pipe", encoding: "utf-8" }
+    const packageName: string = (
+      await runCommandInContainer(
+        "debian:stable-slim",
+        `dpkg -S "$(readlink -f ${library})"`
+      )
     ).split(":")[0];
+
+    console.log(packageName);
+
 
     return packageName;
   } catch (e2) {}
@@ -83,7 +90,7 @@ const filterPackages = (
   };
 };
 
-const dependenciesModule = (
+const dependenciesModule = async (
   _inspectedData: SourceInfo,
   tracedData: SystemInfo,
   languageData: any,
@@ -98,14 +105,14 @@ const dependenciesModule = (
   const systemDependencies: Array<string> = new Array<string>();
   const pathsList: Array<string> = new Array<string>();
 
-  syscalls.forEach((call) => {
+  for (const call of syscalls) {
     const fileName: string =
       call.syscall === "openat" ? call.args[1] : call.args[0];
 
     if (analyzedDependencies.includes(fileName)) return;
 
     if (isLibrary(fileName)) {
-      const packageName: string | null = getPackageName(fileName);
+      const packageName: string | null = await getPackageName(fileName);
 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
@@ -117,7 +124,7 @@ const dependenciesModule = (
     }
 
     analyzedDependencies.push(fileName);
-  });
+  }
 
   return {
     languagueDependencies: installationSteps,
