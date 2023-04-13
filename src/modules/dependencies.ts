@@ -1,40 +1,48 @@
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 
-import SourceInfo from '../utils/lib/SourceInfo';
-import SystemInfo from '../utils/lib/SystemInfo';
-import Syscall from '../utils/lib/Syscall';
-import DependenciesData from '../utils/lib/DependenciesData';
-import HermitOptions from '../utils/lib/HermitOptions'
+import SourceInfo from "../utils/lib/SourceInfo";
+import SystemInfo from "../utils/lib/SystemInfo";
+import Syscall from "../utils/lib/Syscall";
+import DependenciesData from "../utils/lib/DependenciesData";
+import HermitOptions from "../utils/lib/HermitOptions";
 
-import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
-import logger from '../utils/logger';
+import { readDebianPackages, readLanguagePackages } from "../utils/fileSystem";
+import logger from "../utils/logger";
 
 const getPackageName = (library: string) => {
   try {
-    const packageName: string = execSync(`dpkg -S ${library}`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+    const packageName: string = execSync(`dpkg -S ${library}`, {
+      stdio: "pipe",
+      encoding: "utf-8",
+    }).split(":")[0];
 
     return packageName;
-  }
-  catch (e) { }
+  } catch (e) {}
 
   try {
-    const packageName: string = execSync(`dpkg -S "$(readlink -f ${library})"`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+    const packageName: string = execSync(
+      `dpkg -S "$(readlink -f ${library})"`,
+      { stdio: "pipe", encoding: "utf-8" }
+    ).split(":")[0];
 
     return packageName;
-  }
-  catch (e2) { }
+  } catch (e2) {}
 
   return null;
-}
+};
 
 const isLibrary = (fileName: string) => {
-  if ((typeof fileName) !== "string") {
+  if (typeof fileName !== "string") {
     return false;
   }
-  return fileName.split('.').includes('so') && !fileName.includes('python');
-}
+  return fileName.split(".").includes("so") && !fileName.includes("python");
+};
 
-const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any): DependenciesData => {
+const filterPackages = (
+  packagesList: Array<string>,
+  pathsList: Array<string>,
+  languageData: any
+): DependenciesData => {
   const { languagePackages } = languageData;
 
   const installablePackages: Array<string> = new Array<string>();
@@ -42,7 +50,9 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   const librariesPath: Array<string> = new Array<string>();
 
   const debianPackages: Array<string> = readDebianPackages();
-  const languagepackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
+  const languagepackages: Array<string> = readLanguagePackages(
+    languageData.PACKAGES_LIST
+  );
 
   let packagesCount: number = packagesList.length;
 
@@ -69,21 +79,28 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
 
   return {
     packages: filteredPackages.concat(languagePackages),
-    libraries: librariesPath
+    libraries: librariesPath,
   };
-}
+};
 
-const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, _options: HermitOptions) => {
+const dependenciesModule = (
+  _inspectedData: SourceInfo,
+  tracedData: SystemInfo,
+  languageData: any,
+  _options: HermitOptions
+) => {
   const syscalls: Array<Syscall> = tracedData.openat;
-  const installationSteps: Array<string> = languageData.languageDependenciesInstallation;
+  const installationSteps: Array<string> =
+    languageData.languageDependenciesInstallation;
 
-  const analyzedDependencies: Array<string> = new Array<string>()
-  const languageDependencies: Array<string> = new Array<string>()
-  const systemDependencies: Array<string> = new Array<string>()
-  const pathsList: Array<string> = new Array<string>()
+  const analyzedDependencies: Array<string> = new Array<string>();
+  const languageDependencies: Array<string> = new Array<string>();
+  const systemDependencies: Array<string> = new Array<string>();
+  const pathsList: Array<string> = new Array<string>();
 
   syscalls.forEach((call) => {
-    const fileName: string = (call.syscall === "openat") ? call.args[1] : call.args[0];
+    const fileName: string =
+      call.syscall === "openat" ? call.args[1] : call.args[0];
 
     if (analyzedDependencies.includes(fileName)) return;
 
@@ -95,8 +112,7 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
         pathsList.push(fileName);
         logger.info(`Package ${packageName} detected`);
       }
-    }
-    else {
+    } else {
       languageDependencies.push(fileName);
     }
 
@@ -105,8 +121,12 @@ const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, 
 
   return {
     languagueDependencies: installationSteps,
-    systemDependencies: filterPackages(systemDependencies, pathsList, languageData)
-  }
-}
+    systemDependencies: filterPackages(
+      systemDependencies,
+      pathsList,
+      languageData
+    ),
+  };
+};
 
 export default dependenciesModule;
