@@ -13,7 +13,7 @@ export const runCommandInContainer = async (
   image: string,
   command: string
 ): Promise<string> => {
-  docker.pull(image);
+  await docker.pull(image);
 
   let output = "";
 
