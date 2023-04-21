@@ -49,6 +49,7 @@ export const dockerfileGeneration = async (
     inspectedData,
     tracedData,
     languageData,
+    imageData,
     options
   );
   const portsData = portsModule(

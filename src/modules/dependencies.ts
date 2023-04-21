@@ -9,34 +9,49 @@ import HermitOptions from "../utils/lib/HermitOptions";
 import { readDebianPackages, readLanguagePackages } from "../utils/fileSystem";
 import logger from "../utils/logger";
 import { runCommandInContainer } from "../utils/containers";
+import * as os from "os";
 
-const getPackageName = async (library: string) => {
-  const imageName = "debian:stable-slim";
+const processDpkgOutput = (output: string): string | null => {
+  if (output.includes("no path found")) return null;
+
+  return output.split(":")[0];
+};
+
+const getPackageName = async (
+  library: string,
+  image: string,
+  container: boolean
+) => {
+  const shouldRunInContainer = container || os.type() === "Darwin";
 
   try {
-    const output: string = await runCommandInContainer(
-      imageName,
-      `dpkg -S ${library}`
-    );
+    const command = `dpkg -S ${library}`;
+    let output;
 
-    if (output.includes("no path found")) return null;
+    if (shouldRunInContainer)
+      output = await runCommandInContainer(image, command);
+    else
+      output = execSync(command, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
 
-    const packageName = output.split(":")[0];
-
-    return packageName;
+    return processDpkgOutput(output);
   } catch (e) {}
 
   try {
-    const output: string = await runCommandInContainer(
-      imageName,
-      `dpkg -S "$(readlink -f ${library})"`
-    );
+    const command = `dpkg -S "$(readlink -f ${library})"`;
+    let output;
 
-    if (output.includes("no path found")) return null;
+    if (shouldRunInContainer)
+      output = await runCommandInContainer(image, command);
+    else
+      output = execSync(command, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
 
-    const packageName = output.split(":")[0];
-
-    return packageName;
+    return processDpkgOutput(output);
   } catch (e2) {}
 
   return null;
@@ -98,7 +113,8 @@ const dependenciesModule = async (
   _inspectedData: SourceInfo,
   tracedData: SystemInfo,
   languageData: any,
-  _options: HermitOptions
+  imageData: string[],
+  options: HermitOptions
 ) => {
   const syscalls: Array<Syscall> = tracedData.openat;
   const installationSteps: Array<string> =
@@ -116,7 +132,11 @@ const dependenciesModule = async (
     if (analyzedDependencies.includes(fileName)) return;
 
     if (isLibrary(fileName)) {
-      const packageName: string | null = await getPackageName(fileName);
+      const packageName: string | null = await getPackageName(
+        fileName,
+        imageData[0],
+        options.container
+      );
 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
