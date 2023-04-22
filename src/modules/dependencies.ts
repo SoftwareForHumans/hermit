@@ -129,7 +129,7 @@ const dependenciesModule = async (
     const fileName: string =
       call.syscall === "openat" ? call.args[1] : call.args[0];
 
-    if (analyzedDependencies.includes(fileName)) return;
+    if (analyzedDependencies.includes(fileName)) continue;
 
     if (isLibrary(fileName)) {
       const packageName: string | null = await getPackageName(
@@ -149,7 +149,6 @@ const dependenciesModule = async (
 
     analyzedDependencies.push(fileName);
   }
-
   return {
     languagueDependencies: installationSteps,
     systemDependencies: filterPackages(
