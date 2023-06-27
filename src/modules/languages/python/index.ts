@@ -4,7 +4,7 @@ import { existsRequirements, existsPipfile, readPipfile } from '../../../utils/f
 const LOCAL_SITE_PACKAGES = "local-site-packages";
 
 export const languageImages = [
-  "python:3.8-slim",
+  "python:3.11-slim",
   "gcr.io/distroless/python3"
 ];
 
@@ -38,7 +38,7 @@ export const languageStaticInspection = (info: SourceInfo) => {
 
     const pipfileContent: string = readPipfile();
     const regexMatch = pipfileContent.match(/python_version = "(.*?)"/);
-    languageImages[0] = `python:${(regexMatch == null) ? "3.8" : regexMatch[1]}-slim`;
+    languageImages[0] = `python:${(regexMatch == null) ? "3.11" : regexMatch[1]}-slim`;
 
     languagePackages.push(...buildPackages);
   }

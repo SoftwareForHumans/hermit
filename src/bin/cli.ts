@@ -33,7 +33,9 @@ const hermitCLI = async () => {
   if (commander.args.length === 0 && !options.container) commander.help();
 
   const dockerfileData = await dockerfileGeneration(command, options);
-  console.log(dockerfileData);
+
+  if (dockerfileData) console.log(dockerfileData);
+  else console.log("GENERATION FAILED!")
 }
 
 hermitCLI();

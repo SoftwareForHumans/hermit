@@ -1,40 +1,74 @@
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 
-import SourceInfo from '../utils/lib/SourceInfo';
-import SystemInfo from '../utils/lib/SystemInfo';
-import Syscall from '../utils/lib/Syscall';
-import DependenciesData from '../utils/lib/DependenciesData';
-import HermitOptions from '../utils/lib/HermitOptions'
+import SourceInfo from "../utils/lib/SourceInfo";
+import SystemInfo from "../utils/lib/SystemInfo";
+import Syscall from "../utils/lib/Syscall";
+import DependenciesData from "../utils/lib/DependenciesData";
+import HermitOptions from "../utils/lib/HermitOptions";
 
-import { readDebianPackages, readLanguagePackages } from '../utils/fileSystem';
-import logger from '../utils/logger';
+import { readDebianPackages, readLanguagePackages } from "../utils/fileSystem";
+import logger from "../utils/logger";
+import { runCommandInContainer } from "../utils/containers";
+import * as os from "os";
 
-const getPackageName = (library: string) => {
+const processDpkgOutput = (output: string): string | null => {
+  if (output.includes("no path found")) return null;
+
+  return output.split(":")[0];
+};
+
+const getPackageName = async (
+  library: string,
+  image: string,
+  container: boolean
+) => {
+  const shouldRunInContainer = container || os.type() === "Darwin";
+
   try {
-    const packageName: string = execSync(`dpkg -S ${library}`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+    const command = `dpkg -S ${library}`;
+    let output;
 
-    return packageName;
-  }
-  catch (e) { }
+    if (shouldRunInContainer)
+      output = await runCommandInContainer(image, command);
+    else
+      output = execSync(command, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+
+    return processDpkgOutput(output);
+  } catch (e) {}
 
   try {
-    const packageName: string = execSync(`dpkg -S "$(readlink -f ${library})"`, { stdio: 'pipe', encoding: 'utf-8' }).split(':')[0];
+    const command = `dpkg -S "$(readlink -f ${library})"`;
+    let output;
 
-    return packageName;
-  }
-  catch (e2) { }
+    if (shouldRunInContainer)
+      output = await runCommandInContainer(image, command);
+    else
+      output = execSync(command, {
+        stdio: "pipe",
+        encoding: "utf-8",
+      });
+
+    return processDpkgOutput(output);
+  } catch (e2) {}
 
   return null;
-}
+};
 
 const isLibrary = (fileName: string) => {
-  if ((typeof fileName) !== "string") {
+  if (typeof fileName !== "string") {
     return false;
   }
-  return fileName.split('.').includes('so') && !fileName.includes('python');
-}
+  return fileName.split(".").includes("so") && !fileName.includes("python");
+};
 
-const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, languageData: any): DependenciesData => {
+const filterPackages = (
+  packagesList: Array<string>,
+  pathsList: Array<string>,
+  languageData: any
+): DependenciesData => {
   const { languagePackages } = languageData;
 
   const installablePackages: Array<string> = new Array<string>();
@@ -42,7 +76,9 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
   const librariesPath: Array<string> = new Array<string>();
 
   const debianPackages: Array<string> = readDebianPackages();
-  const languagepackages: Array<string> = readLanguagePackages(languageData.PACKAGES_LIST);
+  const languagepackages: Array<string> = readLanguagePackages(
+    languageData.PACKAGES_LIST
+  );
 
   let packagesCount: number = packagesList.length;
 
@@ -69,44 +105,58 @@ const filterPackages = (packagesList: Array<string>, pathsList: Array<string>, l
 
   return {
     packages: filteredPackages.concat(languagePackages),
-    libraries: librariesPath
+    libraries: librariesPath,
   };
-}
+};
 
-const dependenciesModule = (_inspectedData: SourceInfo, tracedData: SystemInfo, languageData: any, _options: HermitOptions) => {
+const dependenciesModule = async (
+  _inspectedData: SourceInfo,
+  tracedData: SystemInfo,
+  languageData: any,
+  imageData: string[],
+  options: HermitOptions
+) => {
   const syscalls: Array<Syscall> = tracedData.openat;
-  const installationSteps: Array<string> = languageData.languageDependenciesInstallation;
+  const installationSteps: Array<string> =
+    languageData.languageDependenciesInstallation;
 
-  const analyzedDependencies: Array<string> = new Array<string>()
-  const languageDependencies: Array<string> = new Array<string>()
-  const systemDependencies: Array<string> = new Array<string>()
-  const pathsList: Array<string> = new Array<string>()
+  const analyzedDependencies: Array<string> = new Array<string>();
+  const languageDependencies: Array<string> = new Array<string>();
+  const systemDependencies: Array<string> = new Array<string>();
+  const pathsList: Array<string> = new Array<string>();
 
-  syscalls.forEach((call) => {
-    const fileName: string = (call.syscall === "openat") ? call.args[1] : call.args[0];
+  for (const call of syscalls) {
+    const fileName: string =
+      call.syscall === "openat" ? call.args[1] : call.args[0];
 
-    if (analyzedDependencies.includes(fileName)) return;
+    if (analyzedDependencies.includes(fileName)) continue;
 
     if (isLibrary(fileName)) {
-      const packageName: string | null = getPackageName(fileName);
+      const packageName: string | null = await getPackageName(
+        fileName,
+        imageData[0],
+        options.container
+      );
 
       if (packageName != null && !systemDependencies.includes(packageName)) {
         systemDependencies.push(packageName);
         pathsList.push(fileName);
         logger.info(`Package ${packageName} detected`);
       }
-    }
-    else {
+    } else {
       languageDependencies.push(fileName);
     }
 
     analyzedDependencies.push(fileName);
-  });
-
+  }
   return {
     languagueDependencies: installationSteps,
-    systemDependencies: filterPackages(systemDependencies, pathsList, languageData)
-  }
-}
+    systemDependencies: filterPackages(
+      systemDependencies,
+      pathsList,
+      languageData
+    ),
+  };
+};
 
 export default dependenciesModule;

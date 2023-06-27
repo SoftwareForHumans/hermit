@@ -19,7 +19,7 @@ const generatorModule = (dockerfileData: DockerfileData, options: HermitOptions)
   content += `FROM ${dockerfileData.images[0]} ${isMultiStage ? "AS build-env" : ""}\n`;
 
   // Import service source code
-  content += "ADD . /app\n";
+  content += "COPY . /app\n";
   content += "WORKDIR /app\n";
   content += "\n";
 
